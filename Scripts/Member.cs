@@ -1,6 +1,7 @@
 using UnityEngine;
 
-[System.Serializable]
+[CreateAssetMenu(fileName = "New Member", menuName = "Members/Member")]
+
 public class Member : ScriptableObject
 {
     public string fullname;

@@ -5,11 +5,16 @@ public class DisplayJournal : MonoBehaviour
 {
     public Text journalPage;
     public Text currentPage;
+    public GameObject visualPage;
+
 
     public EventGenerator eventGenerator;
     public TeamManager teamManager;
+    public TimeManager timeManager;
     public ItemsManager itemsManager;
     public Member member;
+
+
     private bool eventBegan = false;
     private bool journalDisplayed = false;
     private bool teamInfosPageDisplayed = false;
@@ -29,8 +34,12 @@ public class DisplayJournal : MonoBehaviour
         eventGenerator.RandomizeEvent(); 
     }
 
+
     public void OnNextPageButtonClick()
     {
+
+        journalPage.text += timeManager.currentDay + " :\n";
+        
         if(journalDisplayed)
         {
             if(!eventBegan)
@@ -53,15 +62,22 @@ public class DisplayJournal : MonoBehaviour
             eventGenerator.DisplayEvent();
         }
 
-        if (teamInfosPageDisplayed)
+        if(teamInfosPageDisplayed)
         {
             SuppliesPageDisplay();
         }
 
         if(journalDisplayed && teamInfosPageDisplayed && suppliesPageDisplayed)
         {
+            timeManager.NextDay();
             ResetJournal();
         }
+    }
+
+    public void GeneratePage()
+    {
+        
+
     }
 
     public void ResetJournal()
@@ -78,7 +94,7 @@ public class DisplayJournal : MonoBehaviour
 
         // journalPage.text = $"Journal:\n{currentPage.title}: {currentPage.description}";
             
-        foreach (Member member in teamManager.teamMembers)
+        foreach(Member member in teamManager.teamMembers)
         {
             if(member.isInTeam)
             {
@@ -104,5 +120,5 @@ public class DisplayJournal : MonoBehaviour
 
         suppliesPageDisplayed = true;
     }
-    //On doit display pour chaque membre de la team des infos différentes, si ils ont besoin de nourriture, d'eau, leurs état de santé mentale ou leurs état de santé physique
 }
+
