@@ -11,5 +11,6 @@ public class TimeManager : MonoBehaviour
     currentDay += 1;
     teamManager.AdjustTeamStats(-teamManager.feedRate, -teamManager.drinkRate,-teamManager.feedRate, -teamManager.drinkRate);
     teamManager.LifeCheck();
+    teamManager.DisplayTeam();
    }
 }

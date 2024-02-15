@@ -9,6 +9,7 @@ public class ItemsManager : MonoBehaviour
     public int food;
     public int drink;
     public int money;
+    
     public List<ItemData> inventoryItems = new List<ItemData>();
     public TeamManager teamManager;
 
