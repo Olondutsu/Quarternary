@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Member : ScriptableObject
 {
+    public GameObject journalVisual;
+    public GameObject gameVisual;
     public string fullname;
     public int physicalHealth;
     public int mentalHealth;

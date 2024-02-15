@@ -6,10 +6,11 @@ public class EventGenerator : MonoBehaviour
 {
     public Text journalText;
     public Event[] events;
-    private Event currentEvent;
+    public Event currentEvent;
     private Event pastEvent;
     public bool outcomeDisplayed;
     private ItemsManager itemManager;
+    private TeamManager teamManager;
 
      public void RandomizeEvent()
     {
@@ -87,22 +88,44 @@ public class EventGenerator : MonoBehaviour
     {
         foreach(ItemData rewards in currentEvent.reward)
         {
-            // itemManager.AddItem(rewards);
+            itemManager.AddItem(rewards);
         }
 
         foreach(ItemData loss in currentEvent.loss)
         {
-             // itemManager.AddItem(loss);
+             itemManager.AddItem(loss);
         }
 
-        // foreach(ItemData neededItems in currentEvent.neededItems)
-        // {
-        //         // A modifier, ici ptet créer une liste d'Items pour verifier si ya bien les items dans l'inventaire blblbla
-        //         if(ownedItems = neededItems) 
-        //         {
-        //             neededItems.journalVisualAvailable.SetActive(true);
-        //         }
-        // }
+        foreach(ItemData neededItems in currentEvent.neededItems)
+        {
+                foreach(ItemData ownedItems in itemManager.inventoryItems)
+                {
+                // A modifier, ici ptet créer une liste d'Items pour verifier si ya bien les items dans l'inventaire blblbla
+                    if(ownedItems == neededItems) 
+                    {
+                        neededItems.journalVisualAvailable.SetActive(true);
+                        neededItems.journalVisualAvailable.SetActive(false);
+                    }
+                    else
+                    {
+                        neededItems.journalVisualAvailable.SetActive(false);
+                        neededItems.journalVisualUnAvailable.SetActive(true);
+                    }
+                }
+        }
+    }
+
+     public void MemberHandler()
+    {
+        foreach(Member eventAddedMember in currentEvent.addedMember)
+        {
+            teamManager.AddMember(eventAddedMember);
+        }
+        
+        foreach(Member eventRemovedMember in currentEvent.removedMember)
+        {
+            teamManager.RemoveMember(eventRemovedMember);
+        }
     }
 }
 

@@ -1,53 +1,51 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class TeamManager : MonoBehaviour
 {
+    public int feedRate;
+    public int drinkRate;
+
     public List<Member> teamMembers = new List<Member>(); 
 
-    public void AddMember(Member newMember)
+    public void AddMember(Member addMember)
     {
-        teamMembers.Add(newMember);
-    }
+        teamMembers.Add(addMember);
 
-    public void RemoveMember(Member memberToRemove)
+    }
+    public void RemoveMember(Member rmvMember)
     {
-        teamMembers.Remove(memberToRemove);
+        teamMembers.Remove(rmvMember);
     }
-
-    public void AdjustTeamThirst(int amount)
-    {
-        foreach (Member member in teamMembers)
-        {
-            member.thirst += amount;
-        }
-    }
-
-    // Méthode pour ajuster la faim de tous les membres de l'équipe
-    public void AdjustTeamHunger(int amount)
-    {
-        foreach (Member member in teamMembers)
-        {
-            member.hunger += amount;
-        }
-    }
-
-    public void AdjustTeamPhysicalHealth(int amount)
-    {
-        foreach (Member member in teamMembers)
-        {
-            member.physicalHealth += amount;
-        }
-    }
-
-    // Méthode pour ajuster la faim de tous les membres de l'équipe
-    public void AdjustTeamMentalHealth(int amount)
-    {
-        foreach (Member member in teamMembers)
-        {
-            member.mentalHealth += amount;
-        }
-    }
-
     
+    public void AdjustTeamStats(int hungerAmount, int thirstAmount, int physicalHealthAmount, int mentalHealthAmount)
+    {
+        foreach (Member member in teamMembers)
+        {
+            member.hunger += hungerAmount;
+            member.thirst += thirstAmount;
+            member.physicalHealth += physicalHealthAmount;
+            member.mentalHealth += mentalHealthAmount;
+        }
+    }
+    // AdjustTeam, for the whole team, good at the end of a turn
+    
+    public void FeedMember(Member member, int feedRate)
+    {
+        member.hunger += feedRate;
+    }
+
+    public void UnthirstMember(Member member, int drinkRate)
+    {
+        member.hunger += drinkRate;
+    }    
+
+    public void DisplayTeam()
+    {
+        foreach (Member member in teamMembers)
+        {
+            member.gameVisual.SetActive(true);
+        }
+    }
 }

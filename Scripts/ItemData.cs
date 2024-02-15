@@ -8,5 +8,5 @@ public class ItemData : ScriptableObject
     public GameObject visual;
     public GameObject journalVisualAvailable;
     public GameObject journalVisualUnAvailable;
-
+    public bool isSupplie;
 }

@@ -3,10 +3,8 @@ using UnityEngine.UI;
 
 public class DisplayJournal : MonoBehaviour
 {
-    public Text journalPage;
     public Text currentPage;
     public GameObject visualPage;
-
 
     public EventGenerator eventGenerator;
     public TeamManager teamManager;
@@ -14,57 +12,40 @@ public class DisplayJournal : MonoBehaviour
     public ItemsManager itemsManager;
     public Member member;
 
+    public Page eventPage;
+    public Page needsPage;
+    public Page suppliesPage;
 
+
+    private bool eventDisplayed;
     private bool eventBegan = false;
     private bool journalDisplayed = false;
     private bool teamInfosPageDisplayed = false;
     private bool suppliesPageDisplayed = false;
 
-    // Le Journal doit montrer une base commune sans prendre en compte les Event qui sont gérés par EventGenerator
-    // Dans un premier temps on display les Event ou alors le Journal, a voir ce qui est le mieux
-    // Pour Display le Journal, on doit pré-configuré certaines pages, les indications sur notre groupe, le rationnement.
-    // On montre d'abord l'outcome de l'event précédent..
-    // Ensuite on montre les indications sur le groupe
-    // Ensuite le rationnement
-    // Puis finalement l'event
-
 
     void Start()
     {
-        eventGenerator.RandomizeEvent(); 
+        journalDisplayed = true;
+        PopulatePages();
     }
 
 
     public void OnNextPageButtonClick()
     {
-
-        journalPage.text += timeManager.currentDay + " :\n";
-        
         if(journalDisplayed)
         {
-            if(!eventBegan)
-            {
-                eventGenerator.RandomizeEvent();
-            }
-            else
-            {
-                eventGenerator.EventEnabler();
-            }
+            eventPage.pageVisual.SetActive(true);
         }
 
-        if(eventGenerator.outcomeDisplayed)
+        if(eventDisplayed)
         {
-            TeamInfosPageDisplay();
-        }
-
-        else
-        {
-            eventGenerator.DisplayEvent();
+            needsPage.pageVisual.SetActive(true);
         }
 
         if(teamInfosPageDisplayed)
         {
-            SuppliesPageDisplay();
+            suppliesPage.pageVisual.SetActive(true);
         }
 
         if(journalDisplayed && teamInfosPageDisplayed && suppliesPageDisplayed)
@@ -73,11 +54,11 @@ public class DisplayJournal : MonoBehaviour
             ResetJournal();
         }
     }
-
-    public void GeneratePage()
+    
+    public void NewDay()
     {
-        
-
+        journalDisplayed = true;
+        PopulatePages();
     }
 
     public void ResetJournal()
@@ -86,39 +67,91 @@ public class DisplayJournal : MonoBehaviour
         teamInfosPageDisplayed = false;
         suppliesPageDisplayed = false;
         eventGenerator.outcomeDisplayed = false;
+        
+        suppliesPage.pageHead.text = "\n";
+        suppliesPage.pageBody.text =  "\n";
+
+        needsPage.pageHead.text = "\n";
+        needsPage.pageBody.text =  "\n";
+
+        eventPage.pageHead.text = "\n";
+        eventPage.pageBody.text =  "\n";
+
+        teamManager.AdjustTeamStats(teamManager.feedRate, teamManager.drinkRate,teamManager.feedRate, teamManager.drinkRate);
+        NewDay();
     }
 
-     public void TeamInfosPageDisplay()
+    public void PopulatePages()
     {
-        // teamMembers = teamManager.teamMembers; // Accéder à la liste des membres de l'équipe
+        PopulateEventPage();
+        PopulateNeedsPage();
+        PopulateSuppliesPage();
+    
+    }
 
-        // journalPage.text = $"Journal:\n{currentPage.title}: {currentPage.description}";
-            
+    void PopulateSuppliesPage() 
+    {
+        suppliesPage.CheckButtons();
+
+        suppliesPage.pageHead.text += timeManager.currentDay + " :\n";
+
+        foreach(Member member in teamManager.teamMembers)
+        {
+        // A mettre en enfant dun truc qui s'alligne ?
+        member.journalVisual.SetActive(true);
+
+            foreach(ItemData item in itemsManager.inventoryItems)
+            {
+                if(item.isSupplie)
+                {
+
+                suppliesPage.slot.emptyVisual = item.journalVisualAvailable;
+
+                suppliesPage.pageBody.text += "Heal Kit : " + itemsManager.healKit + "\n";
+                suppliesPage.pageBody.text += "Food : " + itemsManager.food + "\n";
+                suppliesPage.pageBody.text += "Drink : " + itemsManager.drink + "\n";
+                suppliesPage.pageBody.text += "Money : " + itemsManager.money + "\n";
+                suppliesPage.pageBody.text += "\n";
+                }
+            }
+        }
+
+        suppliesPageDisplayed = true;
+    }
+
+    void PopulateNeedsPage() 
+    {
+        needsPage.CheckButtons();
+
+        needsPage.pageHead.text += timeManager.currentDay + " :\n";
+
         foreach(Member member in teamManager.teamMembers)
         {
             if(member.isInTeam)
             {
-                journalPage.text += member.fullname + " :\n";
-                journalPage.text += "Physical Health : " + member.physicalHealth + "\n";
-                journalPage.text += "Mental Health : " + member.mentalHealth + "\n";
-                journalPage.text += "Hunger : " + member.hunger + "\n";
-                journalPage.text += "Thirst : " + member.thirst + "\n";
-                journalPage.text += "\n";
+                needsPage.pageBody.text += member.fullname + " :\n";
+                needsPage.pageBody.text += "Physical Health : " + member.physicalHealth + "\n";
+                needsPage.pageBody.text += "Mental Health : " + member.mentalHealth + "\n";
+                needsPage.pageBody.text += "Hunger : " + member.hunger + "\n";
+                needsPage.pageBody.text += "Thirst : " + member.thirst + "\n";
+                needsPage.pageBody.text += "\n";
             }
         }
 
         teamInfosPageDisplayed = true;
     }
-
-    public void SuppliesPageDisplay()
+    void PopulateEventPage()
     {
-        journalPage.text += "Heal Kit : " + itemsManager.healKit + "\n";
-        journalPage.text += "Food : " + itemsManager.food + "\n";
-        journalPage.text += "Drink : " + itemsManager.drink + "\n";
-        journalPage.text += "Money : " + itemsManager.money + "\n";
-        journalPage.text += "\n";
+        eventPage.CheckButtons();
+        eventPage.pageHead.text = timeManager.currentDay + " :\n";
+        Event rnEvent = eventGenerator.currentEvent;
+        eventPage.pageBody.text = rnEvent.description;
 
-        suppliesPageDisplayed = true;
+    }
+
+    public void ApplyAction()
+    {
+        
     }
 }
 
