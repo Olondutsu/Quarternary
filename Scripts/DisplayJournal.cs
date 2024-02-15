@@ -3,9 +3,6 @@ using UnityEngine.UI;
 
 public class DisplayJournal : MonoBehaviour
 {
-    public Text currentPage;
-    public GameObject visualPage;
-
     public EventGenerator eventGenerator;
     public TeamManager teamManager;
     public TimeManager timeManager;
@@ -17,7 +14,7 @@ public class DisplayJournal : MonoBehaviour
     public Page suppliesPage;
 
 
-    private bool eventDisplayed;
+    private bool eventDisplayed =false;
     private bool eventBegan = false;
     private bool journalDisplayed = false;
     private bool teamInfosPageDisplayed = false;
@@ -36,20 +33,24 @@ public class DisplayJournal : MonoBehaviour
         if(journalDisplayed)
         {
             eventPage.pageVisual.SetActive(true);
+            eventDisplayed = true;
         }
 
         if(eventDisplayed)
         {
             needsPage.pageVisual.SetActive(true);
+            teamInfosPageDisplayed = true;
         }
 
         if(teamInfosPageDisplayed)
         {
             suppliesPage.pageVisual.SetActive(true);
+            suppliesPageDisplayed = true;
         }
 
         if(journalDisplayed && teamInfosPageDisplayed && suppliesPageDisplayed)
         {
+            
             timeManager.NextDay();
             ResetJournal();
         }
@@ -66,7 +67,7 @@ public class DisplayJournal : MonoBehaviour
         journalDisplayed = false;
         teamInfosPageDisplayed = false;
         suppliesPageDisplayed = false;
-        eventGenerator.outcomeDisplayed = false;
+        eventDisplayed = false;
         
         suppliesPage.pageHead.text = "\n";
         suppliesPage.pageBody.text =  "\n";
@@ -77,7 +78,9 @@ public class DisplayJournal : MonoBehaviour
         eventPage.pageHead.text = "\n";
         eventPage.pageBody.text =  "\n";
 
-        teamManager.AdjustTeamStats(teamManager.feedRate, teamManager.drinkRate,teamManager.feedRate, teamManager.drinkRate);
+        // a déplacer dans nextday du timeManager
+        
+
         NewDay();
     }
 
@@ -116,7 +119,7 @@ public class DisplayJournal : MonoBehaviour
             }
         }
 
-        suppliesPageDisplayed = true;
+        
     }
 
     void PopulateNeedsPage() 
@@ -129,12 +132,78 @@ public class DisplayJournal : MonoBehaviour
         {
             if(member.isInTeam)
             {
-                needsPage.pageBody.text += member.fullname + " :\n";
-                needsPage.pageBody.text += "Physical Health : " + member.physicalHealth + "\n";
-                needsPage.pageBody.text += "Mental Health : " + member.mentalHealth + "\n";
-                needsPage.pageBody.text += "Hunger : " + member.hunger + "\n";
-                needsPage.pageBody.text += "Thirst : " + member.thirst + "\n";
-                needsPage.pageBody.text += "\n";
+                // FOOD
+                if(member.hunger > 5)
+                {
+                    needsPage.pageBody.text = member.name + "is fully feed.";
+                }
+                if(member.hunger < 5 && member.hunger > 3)
+                {
+                    needsPage.pageBody.text = member.name + "would not mind to eat something.";
+                }
+                if(member.hunger < 3 && member.hunger >1)
+                {
+                    needsPage.pageBody.text = member.name + "begin to be hungry.";
+                }
+                if(member.hunger == 1)
+                {
+                    needsPage.pageBody.text = member.name + "will die if he don't eat.";
+                }
+                
+                if(member.hunger == 0)
+                {
+                    needsPage.pageBody.text = member.name + "died from hunger.";
+                }
+
+                // DRINK
+                if(member.thirst > 5)
+                {
+                    needsPage.pageBody.text = member.name + "is full of water.";
+                }
+                if(member.thirst < 5 && member.hunger > 3)
+                {
+                    needsPage.pageBody.text = member.name + "would not mind to drink a little something.";
+                }
+                if(member.thirst < 3 && member.hunger >1)
+                {
+                    needsPage.pageBody.text = member.name + "begin to be really thirsty.";
+                }
+                if(member.thirst == 1)
+                {
+                    needsPage.pageBody.text = member.name + "will die if he don't drink.";
+                }
+                if(member.thirst == 0)
+                {
+                    needsPage.pageBody.text = member.name + "died from thirst.";
+                }
+                
+                // PHYSICALHEALTH
+                if(member.physicalHealth == 2)
+                {
+                    needsPage.pageBody.text = member.name + "is in perfect health";
+                }
+                if(member.physicalHealth == 1)
+                {
+                    needsPage.pageBody.text = member.name + "begin to be in a critical health";
+                }
+                if(member.physicalHealth == 0)
+                {
+                    needsPage.pageBody.text = member.name + "died from his physical health problems";
+                }
+
+                // MENTALHEALTH
+                if(member.mentalHealth == 2)
+                {
+                    needsPage.pageBody.text = member.name + "is in perfect health";
+                }
+                if(member.mentalHealth == 1)
+                {
+                    needsPage.pageBody.text = member.name + "begin to be in a critical mental health problems";
+                }
+                if(member.mentalHealth == 0)
+                {
+                    needsPage.pageBody.text = member.name + "died due to mental illness";
+                }
             }
         }
 
@@ -142,10 +211,17 @@ public class DisplayJournal : MonoBehaviour
     }
     void PopulateEventPage()
     {
+        eventGenerator.EventEnabler();
+        eventGenerator.RandomizeEvent();
         eventPage.CheckButtons();
+
+        eventGenerator.currentEvent.completed = true;
+        eventGenerator.pastEvent = eventGenerator.currentEvent;
+
         eventPage.pageHead.text = timeManager.currentDay + " :\n";
         Event rnEvent = eventGenerator.currentEvent;
         eventPage.pageBody.text = rnEvent.description;
+        
 
     }
 

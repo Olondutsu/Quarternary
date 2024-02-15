@@ -9,4 +9,7 @@ public class ItemData : ScriptableObject
     public GameObject journalVisualAvailable;
     public GameObject journalVisualUnAvailable;
     public bool isSupplie;
+    public bool isFood;
+    public bool isDrink;
+    public bool isHealKit;
 }

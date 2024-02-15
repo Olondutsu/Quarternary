@@ -7,8 +7,7 @@ public class EventGenerator : MonoBehaviour
     public Text journalText;
     public Event[] events;
     public Event currentEvent;
-    private Event pastEvent;
-    public bool outcomeDisplayed;
+    public Event pastEvent;
     private ItemsManager itemManager;
     private TeamManager teamManager;
 
@@ -23,6 +22,10 @@ public class EventGenerator : MonoBehaviour
             if (ev.conditionsMet)
             {
                 availableEvents.Add(ev);
+            }
+            if (ev.completed)
+            {
+                availableEvents.Remove(ev);
             }
         }
 
@@ -46,7 +49,7 @@ public class EventGenerator : MonoBehaviour
                     currentEvent.conditionsMet = true;
                 }
             }
-        }  
+        } 
     }
 
     public void EventEnabler()
@@ -77,10 +80,7 @@ public class EventGenerator : MonoBehaviour
         // a deplacer dans le journalDisplay (ou pas)
         if (currentEvent.conditionsMet)
         {
-            journalText.text = $"Journal:\n{currentEvent.title}: {currentEvent.description}";
-            currentEvent.completed = true;
-            currentEvent = pastEvent;
-            EventEnabler();
+
         }
     }
 

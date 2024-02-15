@@ -3,19 +3,23 @@ using UnityEngine.UI;
 
 public class Page: MonoBehaviour
 {
-    bool isEventPage;
-    bool isNeedsPage;
-    bool isSuppliesPage;
 
     public Slot slot;
-    public Text pageHead;
-    public Text pageBody;
     public EventGenerator eventGenerator;
     public DisplayJournal displayJournal;
+
     public GameObject pageVisual;
     public GameObject yesButton;
     public GameObject noButton;
     public GameObject nextButton;
+
+    public Text pageHead;
+    public Text pageBody;
+
+    public bool isEventPage;
+    public bool isNeedsPage;
+    public bool isSuppliesPage;
+
 
 
 
@@ -26,11 +30,20 @@ public class Page: MonoBehaviour
 
     public void CheckButtons()
     {
-        if(eventGenerator.currentEvent.boolChoice && isEventPage)
+        if(isEventPage)
         {
-            yesButton.SetActive(true);
-            noButton.SetActive(true);
-            nextButton.SetActive(false);
+            if(eventGenerator.currentEvent.boolChoice)
+            {
+                yesButton.SetActive(true);
+                noButton.SetActive(true);
+                nextButton.SetActive(false);
+            }
+            else
+            {
+                yesButton.SetActive(false);
+                noButton.SetActive(false);
+                nextButton.SetActive(true);
+            }
         }
         else
         {
