@@ -5,6 +5,8 @@ public class MapCase: MonoBehaviour
 {
     public Member member;
     public ItemsManager itemManager;
+    public Text eventName;
+    
     public int XCoordinate;
     public int YCoordinate;
     public int travelTime;

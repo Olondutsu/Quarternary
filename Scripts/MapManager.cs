@@ -8,7 +8,7 @@ public class MapManager : MonoBehaviour
 
     public MapCase mapCase;
     public MapCase playerCase;
-
+    
     public void RandomizeCasesEvent()
     {
         foreach(MapCase mapCase in mapCases)
@@ -37,12 +37,12 @@ public class MapManager : MonoBehaviour
         {
             if(mapCase.memberOccupied)
             {
-                // Display le nom du joueur sur cette même case
+                mapCase.eventName.text = mapCase.member.name;
             }
 
             if(mapCase.eventOccupied)
             {
-
+                mapCase.eventName.text = mapCase.mapEvent.title;
             }
         }
     }
