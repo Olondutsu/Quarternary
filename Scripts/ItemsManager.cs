@@ -22,12 +22,19 @@ public class ItemsManager : MonoBehaviour
     {
         inventoryItems.Remove(rmvItem);
     }
+    public void InitializeItems()
+    {
+        foreach(ItemData item in inventoryItems)
+        {
+            // Histoire de dire que les Items dans les Int sont les meme que ceux dans inventoryItems;
+        }
+    }
 
     public void DisplayItemsVisual()
     {
         foreach(ItemData item in inventoryItems)
         {
-            item.visual.SetActive(true);
+            //
         }
     }
     

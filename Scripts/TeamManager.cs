@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -6,7 +7,14 @@ public class TeamManager : MonoBehaviour
 {
     public int feedRate;
     public int drinkRate;
+
     public List<Member> teamMembers = new List<Member>(); 
+    public List<Member> selectedMembers = new List<Member>();
+    public List<Member> travelingMembers = new List<Member>();
+
+    public MapManager mapManager;
+    public TimeManager timeManager;
+
 
     // BASIC LIST MANIPULATION
     public void AddMember(Member addMember)
@@ -28,7 +36,8 @@ public class TeamManager : MonoBehaviour
     {
         foreach (Member member in teamMembers)
         {
-            member.gameVisual.SetActive(true);
+            // member.gameVisual.SetActive(true);
+            OnSelectionClick(member);
         }
     }
 
@@ -36,7 +45,7 @@ public class TeamManager : MonoBehaviour
     {
         foreach (Member member in teamMembers)
         {
-            if(member.hunger > 1 || member.thirst > 1 || member.physicalHealth > 1 || member.mentalHealth > 1)
+            if(member.hunger == 0|| member.thirst == 0 || member.physicalHealth == 0 || member.mentalHealth == 0)
             {
                 teamMembers.Remove(member);
             }
@@ -70,4 +79,53 @@ public class TeamManager : MonoBehaviour
         member.physicalHealth += 5;
         member.mentalHealth += 5;
     }
+
+    // SELECTION
+    public void OnSelectionClick(Member selected)
+    {
+        selected.selected = !selected.selected;
+        if(selected.selected)
+        {
+            SelectMembers(selected);
+        }
+    }
+
+
+    public void SelectMembers(Member selected)
+    {
+        foreach(Member member in teamMembers)
+        {
+            if(member.selected)
+            {
+                selectedMembers.Add(selected);
+                // member.journalVisualHighlight.SetActive(true);
+            }
+            else
+            {
+                selectedMembers.Remove(selected);
+                // member.journalVisualHighlight.SetActive(false);
+            }
+        }
+    }
+
+    // ACTIONS
+    public void OnTravel()
+    {
+        foreach(Member selectedMember in selectedMembers)
+        {
+            RemoveMember(selectedMember);
+            travelingMembers.Add(selectedMember);
+            selectedMember.isInTeam = false;
+            MemberDayCount();
+            timeManager.travelChecked = true;
+        }
+    }
+
+    public void MemberDayCount()
+    {
+        int arrivalDay = timeManager.currentDay + mapManager.onTravel;
+        int returnDay = timeManager.currentDay + mapManager.onTravel + mapManager.onTravel;
+        timeManager.TravelCheck(arrivalDay, returnDay);
+    }
+
 }

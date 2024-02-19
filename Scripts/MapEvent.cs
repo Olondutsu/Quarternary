@@ -1,8 +1,8 @@
 using JetBrains.Annotations;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "New Event", menuName = "Events/Event")]
-public class MapEVent : ScriptableObject
+[CreateAssetMenu(fileName = "New MapEvent", menuName = "Events/MapEvent")]
+public class MapEvent : ScriptableObject
 {
     public string title;
     [TextArea(3, 10)]
@@ -14,6 +14,7 @@ public class MapEVent : ScriptableObject
     public bool completed;
     public int delayDays;
     
+
 
     public Event[] outcomeEvents;
     public Event[] yesOutcomeEvents;

@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Collections;
+using Unity.VisualScripting;
 
 public class EventGenerator : MonoBehaviour
 {
@@ -8,27 +10,38 @@ public class EventGenerator : MonoBehaviour
     public Event[] events;
     public Event currentEvent;
     public Event pastEvent;
+    public Slot slot;
     private ItemsManager itemManager;
     private TeamManager teamManager;
 
-     public void RandomizeEvent()
-    {
-        // Filtrer les événements disponibles, faire une liste pour pouvoir ensuite ajouter, to ut ça dans le but de créer un randoom à partir de cette liste
-        List<Event> availableEvents = new List<Event>();
+    List<Event> availableEvents = new List<Event>();
 
+    void Start()
+    {
+        EventChecker();
+        RandomizeEvent();
+    }
+
+    public void EventChecker()
+    {
         foreach (Event ev in events)
         {
             // on ajoute tous ceux qui ont la conditionMet a cette liste trjs dans le but de faire un random
             if (ev.conditionsMet)
             {
                 availableEvents.Add(ev);
+                Debug.Log(ev.title + " a les conditionsMet");
             }
             if (ev.completed)
             {
                 availableEvents.Remove(ev);
+                Debug.Log(ev.title + " est completed");
             }
         }
+    }
 
+     public void RandomizeEvent()
+    {
         if (availableEvents.Count == 0)
         {
             Debug.LogError("Aucun événement disponible n'a conditionsMet à true.");
@@ -78,10 +91,7 @@ public class EventGenerator : MonoBehaviour
     public void DisplayEvent()
     {
         // a deplacer dans le journalDisplay (ou pas)
-        if (currentEvent.conditionsMet)
-        {
-
-        }
+        if (currentEvent.conditionsMet){}
     }
 
     public void EventItemHandler()
@@ -98,20 +108,18 @@ public class EventGenerator : MonoBehaviour
 
         foreach(ItemData neededItems in currentEvent.neededItems)
         {
-                foreach(ItemData ownedItems in itemManager.inventoryItems)
+            foreach(ItemData ownedItems in itemManager.inventoryItems)
+            {
+            // A modifier, ici ptet créer une liste d'Items pour verifier si ya bien les items dans l'inventaire blblbla
+                if(ownedItems == neededItems) 
                 {
-                // A modifier, ici ptet créer une liste d'Items pour verifier si ya bien les items dans l'inventaire blblbla
-                    if(ownedItems == neededItems) 
-                    {
-                        neededItems.journalVisualAvailable.SetActive(true);
-                        neededItems.journalVisualAvailable.SetActive(false);
-                    }
-                    else
-                    {
-                        neededItems.journalVisualAvailable.SetActive(false);
-                        neededItems.journalVisualUnAvailable.SetActive(true);
-                    }
+                    slot.emptyVisual = neededItems.journalVisualAvailable;
                 }
+                else
+                {
+                    slot.emptyVisual = neededItems.journalVisualUnAvailable;
+                }
+            }
         }
     }
 
