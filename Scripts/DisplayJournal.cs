@@ -205,26 +205,57 @@ public class DisplayJournal : MonoBehaviour
                     Slot slot = slotChild.GetComponent<Slot>();
                     if (slot != null)
                     {
+                        // Ajouter ici la logique des objets ? Pour pas que ce soit IsHealSlot, car on ne peut en avoir qu'un par truc et on voudrait faire les 3.
                         Debug.Log("Child n'est pas nul pour les slot en dehors de la boucle");
                         if (slot.isHealKitSlot)
                         {
-                            Debug.Log("healkit trouve");
-                            slot.isHealKitSlot = true;
                             isHealSlot = slot;
+                            if(itemsManager.healKit >= 1)
+                            {
+                                Debug.Log("itemsManager.heal>=1");
+                                //Populate Slot FOOD avec Le AvailableVisual de l'Item
+                                slot.image.sprite= healKitItemData.journalVisualAvailable;
+                            }
+                            else
+                            {
+                                Debug.Log("itemsManager.heal else");
+                                slot.image.sprite = healKitItemData.journalVisualUnAvailable;
+                            }
                         }
 
                         if (slot.isFoodSlot)
                         {
-                            Debug.Log("food trouvé");
                             isFoodSlot = slot;
+                            if(itemsManager.food >= 1)
+                            {
+                                Debug.Log("itemsManager.food >= 1");
+                                //Populate Slot FOOD avec Le AvailableVisual de l'Item
+                                slot.image.sprite = foodItemData.journalVisualAvailable;
+                            }
+                            else
+                            {
+                                Debug.Log("itemsManager.food else");
+                                slot.image.sprite = foodItemData.journalVisualUnAvailable;
+                            }
                         }
                                     
                         if (slot.isDrinkSlot)
                         {
-                            Debug.Log("Drink trouvé");
                             isDrinkSlot = slot;
+                            if(itemsManager.drink >= 1)
+                            {
+                                Debug.Log("itemsManager.drink >=1");
+                                //Populate Slot FOOD avec Le AvailableVisual de l'Item
+                                slot.image.sprite = drinkItemData.journalVisualAvailable;
+                            }
+
+                            else
+                            {
+                                Debug.Log("itemsManager.drink else");
+                                slot.image.sprite = drinkItemData.journalVisualUnAvailable;
+                            }
                         }
-                    }
+                    }  
                     else
                     {
                         Debug.Log("Child est nul pour les slot en dehors de la boucle");
@@ -269,42 +300,42 @@ public class DisplayJournal : MonoBehaviour
                     }
             }
 
-            if(itemsManager.food >= 1)
-                {
-                    Debug.Log("itemsManager.food >= 1");
-                    //Populate Slot FOOD avec Le AvailableVisual de l'Item
-                    isFoodSlot.image.sprite = foodItemData.journalVisualAvailable;
-                }
-                else
-                {
-                    Debug.Log("itemsManager.food else");
-                    isFoodSlot.image.sprite = foodItemData.journalVisualUnAvailable;
-                }
+            // if(itemsManager.food >= 1)
+            //     {
+            //         Debug.Log("itemsManager.food >= 1");
+            //         //Populate Slot FOOD avec Le AvailableVisual de l'Item
+            //         isFoodSlot.image.sprite = foodItemData.journalVisualAvailable;
+            //     }
+            //     else
+            //     {
+            //         Debug.Log("itemsManager.food else");
+            //         isFoodSlot.image.sprite = foodItemData.journalVisualUnAvailable;
+            //     }
 
-                if(itemsManager.drink >= 1)
-                {
-                    Debug.Log("itemsManager.drink >=1");
-                    //Populate Slot FOOD avec Le AvailableVisual de l'Item
-                    isDrinkSlot.image.sprite = drinkItemData.journalVisualAvailable;
-                }
+            //     if(itemsManager.drink >= 1)
+            //     {
+            //         Debug.Log("itemsManager.drink >=1");
+            //         //Populate Slot FOOD avec Le AvailableVisual de l'Item
+            //         isDrinkSlot.image.sprite = drinkItemData.journalVisualAvailable;
+            //     }
 
-                else
-                {
-                    Debug.Log("itemsManager.drink else");
-                    isDrinkSlot.image.sprite = drinkItemData.journalVisualUnAvailable;
-                }
+            //     else
+            //     {
+            //         Debug.Log("itemsManager.drink else");
+            //         isDrinkSlot.image.sprite = drinkItemData.journalVisualUnAvailable;
+            //     }
 
-                if(itemsManager.healKit >= 1)
-                {
-                    Debug.Log("itemsManager.heal>=1");
-                    //Populate Slot FOOD avec Le AvailableVisual de l'Item
-                    isHealSlot.image.sprite= healKitItemData.journalVisualAvailable;
-                }
-                else
-                {
-                    Debug.Log("itemsManager.heal else");
-                    isHealSlot.image.sprite = healKitItemData.journalVisualUnAvailable;
-                }
+            //     if(itemsManager.healKit >= 1)
+            //     {
+            //         Debug.Log("itemsManager.heal>=1");
+            //         //Populate Slot FOOD avec Le AvailableVisual de l'Item
+            //         isHealSlot.image.sprite= healKitItemData.journalVisualAvailable;
+            //     }
+            //     else
+            //     {
+            //         Debug.Log("itemsManager.heal else");
+            //         isHealSlot.image.sprite = healKitItemData.journalVisualUnAvailable;
+            //     }
             }
     }
 
