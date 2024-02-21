@@ -43,15 +43,15 @@ public class MapManager : MonoBehaviour
     {
         // foreach(MapCase mapCase in mapCases)
         // {
-            if(mapCase.isClicked)
-            {
+        if(mapCase.isClicked)
+        {
             int xDistance = Mathf.Abs(playerCase.XCoordinate - mapCase.XCoordinate);
             int yDistance = Mathf.Abs(playerCase.YCoordinate - mapCase.YCoordinate);
             mapCase.travelTime = xDistance + yDistance;
             onTravel = mapCase.travelTime/4 ;    
             DisplayTravel(onTravel);
             // onTravel = onTravel;
-            }
+        }
         // }
     }
     
@@ -63,6 +63,8 @@ public class MapManager : MonoBehaviour
     
     public void OnClick()
     {
+
+        // a deplacer dans MapCase ?
         if(mapCase.isBaseFrom)
         {
             Debug.Log("You can't travel to your base");

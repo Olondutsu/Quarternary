@@ -11,16 +11,17 @@ public class ItemsManager : MonoBehaviour
     public int money;
     
     public List<ItemData> inventoryItems = new List<ItemData>();
+    public Base selectedBase;
     public TeamManager teamManager;
 
-    public void AddItem(ItemData addItem)
+    public void AddItem(Base aBase, ItemData addItem)
     {
-        inventoryItems.Add(addItem);
+        aBase.itemsInBase.Add(addItem);
     }
 
-    public void RemoveItem(ItemData rmvItem)
+    public void RemoveItem(Base aBase, ItemData rmvItem)
     {
-        inventoryItems.Remove(rmvItem);
+        aBase.itemsInBase.Remove(rmvItem);
     }
     public void InitializeItems()
     {
@@ -40,7 +41,7 @@ public class ItemsManager : MonoBehaviour
     
     public void OnUse(ItemData usedItem)
     {
-        foreach(Member teamMember in teamManager.teamMembers)
+        foreach(Member teamMember in selectedBase.membersInBase)
         {
             foreach(ItemData item in inventoryItems)
             {

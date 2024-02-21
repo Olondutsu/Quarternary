@@ -9,6 +9,7 @@ public class Slot: MonoBehaviour
     public ItemData slotItem;
     public ItemsManager itemManager;
     public Member slotMember;
+    public Base slotBase;
     public bool isHealKitSlot;
     public bool isFoodSlot;
     public bool isDrinkSlot;

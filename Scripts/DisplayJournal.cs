@@ -33,6 +33,8 @@ public class DisplayJournal : MonoBehaviour
     public Page suppliesPage;
     public Page mapPage;
 
+    public Base selectedBase;
+
     public int pastIndex = 0;
     public int journalIndex = 0;
     public bool eventDisplayed =false;
@@ -169,7 +171,7 @@ public class DisplayJournal : MonoBehaviour
                 }
             }
         }
-        foreach(Member member in teamManager.teamMembers)
+        foreach(Member member in selectedBase.membersInBase)
         {
             GameObject go;
             xOffset += 3;
@@ -287,7 +289,8 @@ public class DisplayJournal : MonoBehaviour
         needsPage.CheckButtons();
         needsPage.pageHead.text += "DAY " + timeManager.currentDay + ":\n";
 
-        foreach(Member member in teamManager.teamMembers)
+        // refonte du système pour donner acces aux bases
+        foreach(Member member in selectedBase.membersInBase)
         {
             if(member.isInTeam)
             {

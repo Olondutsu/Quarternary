@@ -31,6 +31,17 @@ public class MapCase: MonoBehaviour
     void OnCaseClick()
     {
         mapManager.CalculateMapDistance(this);
+
+        if(this.isBaseFrom)
+        {
+            Debug.Log("You can't travel to your base");
+        }
+        else
+        {
+            // Afficher les boutons de confirmation ou non du voyage avec peut-être le display du jour.
+            // confirmClick où on appelle OnConfirmTravel(),
+            // cancel Clic où on supprime simplement l'affichage des boutons don le reverse d'ici;
+        }
     }
 
 }

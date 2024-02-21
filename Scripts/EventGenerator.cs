@@ -10,6 +10,9 @@ public class EventGenerator : MonoBehaviour
     public Event[] events;
     public Event currentEvent;
     public Event pastEvent;
+    public Base thisBase;
+    public Base selectedBase;
+
     public Slot slot;
     private ItemsManager itemManager;
     private TeamManager teamManager;
@@ -20,6 +23,18 @@ public class EventGenerator : MonoBehaviour
     {
         EventChecker();
         RandomizeEvent();
+        BaseChecker();
+    }
+
+    public void BaseChecker()
+    {
+        foreach(Base aBase in teamManager.bases)
+        {
+            if(aBase.isSelected)
+            {
+                thisBase = aBase;
+            }
+        }
     }
 
     public void EventChecker()
@@ -42,27 +57,33 @@ public class EventGenerator : MonoBehaviour
 
      public void RandomizeEvent()
     {
-        if (availableEvents.Count == 0)
+        foreach(Base aBase in teamManager.bases)
         {
-            Debug.LogError("Aucun événement disponible n'a conditionsMet à true.");
-            return;
-        }
-        // Choisir un événement aléatoire parmi les événements disponibles
-        int randomIndex = Random.Range(0, availableEvents.Count);
-        currentEvent = availableEvents[randomIndex];
-
-        if (currentEvent.isMainEvent)
-        {
-            // On desactive les autres main events si le currentEvent est un maiinEvent
-            foreach (Event unavailableEvents in events)
+            if(aBase.isSelected)
             {
+                if (availableEvents.Count == 0)
+                {
+                    Debug.LogError("Aucun événement disponible n'a conditionsMet à true.");
+                    return;
+                }
+                // Choisir un événement aléatoire parmi les événements disponibles
+                int randomIndex = Random.Range(0, availableEvents.Count);
+                currentEvent = availableEvents[randomIndex];
+
                 if (currentEvent.isMainEvent)
                 {
-                    unavailableEvents.conditionsMet = false;
-                    currentEvent.conditionsMet = true;
+                    // On desactive les autres main events si le currentEvent est un maiinEvent
+                    foreach (Event unavailableEvents in events)
+                    {
+                        if (currentEvent.isMainEvent)
+                        {
+                            unavailableEvents.conditionsMet = false;
+                            currentEvent.conditionsMet = true;
+                        }
+                    }
                 }
-            }
-        } 
+            } 
+        }
     }
 
     public void EventEnabler()
@@ -88,22 +109,16 @@ public class EventGenerator : MonoBehaviour
         }
     }
 
-    public void DisplayEvent()
-    {
-        // a deplacer dans le journalDisplay (ou pas)
-        if (currentEvent.conditionsMet){}
-    }
-
     public void EventItemHandler()
     {
         foreach(ItemData rewards in currentEvent.reward)
         {
-            itemManager.AddItem(rewards);
+            itemManager.AddItem(thisBase, rewards);
         }
 
         foreach(ItemData loss in currentEvent.loss)
         {
-             itemManager.AddItem(loss);
+             itemManager.AddItem(thisBase, loss);
         }
 
         foreach(ItemData neededItems in currentEvent.neededItems)
@@ -125,14 +140,17 @@ public class EventGenerator : MonoBehaviour
 
      public void MemberHandler()
     {
-        foreach(Member eventAddedMember in currentEvent.addedMember)
+        foreach(Base aBase in teamManager.bases)
         {
-            teamManager.AddMember(eventAddedMember);
-        }
-        
-        foreach(Member eventRemovedMember in currentEvent.removedMember)
-        {
-            teamManager.RemoveMember(eventRemovedMember);
+            foreach(Member eventAddedMember in currentEvent.addedMember)
+            {
+                teamManager.AddMember(thisBase, eventAddedMember);
+            }
+                
+            foreach(Member eventRemovedMember in currentEvent.removedMember)
+            {
+                    teamManager.RemoveMember(thisBase, eventRemovedMember);
+            }
         }
     }
 }
