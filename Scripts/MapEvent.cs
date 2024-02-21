@@ -12,13 +12,16 @@ public class MapEvent : ScriptableObject
     public bool boolChoice;
     public bool conditionsMet;
     public bool completed;
+    public bool isFree;
+    public bool isOnMap;
+    public bool isRandom;
     public int delayDays;
     
 
 
-    public Event[] outcomeEvents;
-    public Event[] yesOutcomeEvents;
-    public Event[] noOutcomeEvents;
+    public MapEvent[] outcomeEvents;
+    public MapEvent[] yesOutcomeEvents;
+    public MapEvent[] noOutcomeEvents;
     public ItemData[] reward;
     public ItemData[] loss;
     public ItemData[] neededItems;

@@ -7,14 +7,18 @@ public class MapCase: MonoBehaviour
     
     public Member member;
     public ItemsManager itemManager;
+    public MapManager mapManager;
     public Text eventName;
     public MapEvent[] mapEvent;
-    List<MapEvent> mapEvents = new List<MapEvent>();
+    public MapEvent thisCaseEvent;
+    public List<MapEvent> mapEvents = new List<MapEvent>();
 
     public int XCoordinate;
     public int YCoordinate;
     public int travelTime;
 
+    public bool isBaseFrom;
+    public bool isFree;
     public bool memberOccupied;
     public bool eventOccupied;
 
@@ -22,11 +26,11 @@ public class MapCase: MonoBehaviour
     
     void Start()
     {
-
     }
+    
     void OnCaseClick()
     {
-
+        mapManager.CalculateMapDistance(this);
     }
 
 }

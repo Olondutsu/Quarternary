@@ -31,6 +31,7 @@ public class DisplayJournal : MonoBehaviour
     public Page eventPage;
     public Page needsPage;
     public Page suppliesPage;
+    public Page mapPage;
 
     public int pastIndex = 0;
     public int journalIndex = 0;
@@ -44,6 +45,7 @@ public class DisplayJournal : MonoBehaviour
     void Start()
     {
         NewDay();
+        TeamPopulate();
 
         // PopulatePages();
     }
@@ -142,53 +144,62 @@ public class DisplayJournal : MonoBehaviour
         
         PopulateEventPage();
         PopulateNeedsPage();
-        TeamPopulate();
-    }
-    
-    void PreHeatSuppliePage()
-    {
         PopulateSuppliesPage();
     }
+
     void TeamPopulate()
     {
-        Debug.Log("TeamPopulated");
+        int xOffset = 0;
+
+        foreach(ItemData item in itemsManager.inventoryItems)
+        {
+            if(item.isSupplie)
+            {
+                if(item.isFood)
+                {
+                    foodItemData = item;
+                }
+                if(item.isDrink)
+                {
+                    drinkItemData = item;
+                }
+                if(item.isHealKit)
+                {
+                    healKitItemData = item;
+                }
+            }
+        }
         foreach(Member member in teamManager.teamMembers)
         {
-            Debug.Log("pour chaque membre tant qu'on est plus petit uqe le count");
             GameObject go;
+            xOffset += 3;
+            go = Instantiate(memberPrefab, (parentGameObject.transform)) as GameObject;
+            // xOffset += 3;
+            // Vector3 spawnPosition = parentGameObject.transform.position + new Vector3(xOffset, 0, 0); 
+            // go = Instantiate(memberPrefab, spawnPosition, Quaternion.identity, parentGameObject.transform) as GameObject; 
 
-            go = Instantiate(memberPrefab, parentGameObject.transform) as GameObject;
-                    
-            go.transform.parent = parentGameObject.transform;
+            // go.transform.parent = parentGameObject.transform;
             go.transform.SetParent(parentGameObject.transform);
-                
-            Debug.Log("normalement c instancié");
 
             foreach(Transform child in parentGameObject.transform)
             {
-                Debug.Log("Child " + child.name);
                 foreach(Transform slotParents in child)
                 {
                     foreach(Transform slotChild in slotParents)
                     {
-                        Debug.Log("analse de etous les enfants ?");
-
                         Slot slotScript = slotChild.GetComponent<Slot>();
                         
                         if(slotScript != null)
                         {
-                            Debug.Log("Child nest pas nul pour les slot dans la boucle");
                             if (slotScript.isCharacterSlot)
                             {
                                 isCharacterSlot = slotScript;
-                                Debug.Log("on a trouvé le character slot!");
                                 isCharacterSlot.image.sprite = member.journalVisual;
                                 slotScript.slotMember = member;
                             }
                         }
                         else
                         {
-                            Debug.Log("Child est nul pour les slot dans la boucle");
                         }
                     }
                 }
@@ -201,24 +212,18 @@ public class DisplayJournal : MonoBehaviour
             {
                 foreach(Transform slotChild in slotParent)
                 {
-                    Debug.Log("lautre recherche denfants");
                     Slot slot = slotChild.GetComponent<Slot>();
                     if (slot != null)
                     {
-                        // Ajouter ici la logique des objets ? Pour pas que ce soit IsHealSlot, car on ne peut en avoir qu'un par truc et on voudrait faire les 3.
-                        Debug.Log("Child n'est pas nul pour les slot en dehors de la boucle");
                         if (slot.isHealKitSlot)
                         {
                             isHealSlot = slot;
                             if(itemsManager.healKit >= 1)
                             {
-                                Debug.Log("itemsManager.heal>=1");
-                                //Populate Slot FOOD avec Le AvailableVisual de l'Item
                                 slot.image.sprite= healKitItemData.journalVisualAvailable;
                             }
                             else
                             {
-                                Debug.Log("itemsManager.heal else");
                                 slot.image.sprite = healKitItemData.journalVisualUnAvailable;
                             }
                         }
@@ -228,13 +233,10 @@ public class DisplayJournal : MonoBehaviour
                             isFoodSlot = slot;
                             if(itemsManager.food >= 1)
                             {
-                                Debug.Log("itemsManager.food >= 1");
-                                //Populate Slot FOOD avec Le AvailableVisual de l'Item
                                 slot.image.sprite = foodItemData.journalVisualAvailable;
                             }
                             else
                             {
-                                Debug.Log("itemsManager.food else");
                                 slot.image.sprite = foodItemData.journalVisualUnAvailable;
                             }
                         }
@@ -244,26 +246,27 @@ public class DisplayJournal : MonoBehaviour
                             isDrinkSlot = slot;
                             if(itemsManager.drink >= 1)
                             {
-                                Debug.Log("itemsManager.drink >=1");
-                                //Populate Slot FOOD avec Le AvailableVisual de l'Item
                                 slot.image.sprite = drinkItemData.journalVisualAvailable;
                             }
 
                             else
                             {
-                                Debug.Log("itemsManager.drink else");
                                 slot.image.sprite = drinkItemData.journalVisualUnAvailable;
                             }
                         }
                     }  
                     else
                     {
-                        Debug.Log("Child est nul pour les slot en dehors de la boucle");
                     }
                 }
             }
         }
-        PreHeatSuppliePage();
+        // PreHeatSuppliePage();
+    }
+
+    void PopulateMapPage()
+    {
+        // Afficher les cases, les membres de la team aussi, faire en sortee que tout soit cliquable mais ça se fera sur le map Manager
     }
 
     void AddSupplieSlot(Member member)
@@ -273,78 +276,15 @@ public class DisplayJournal : MonoBehaviour
 
     void PopulateSuppliesPage() 
     {
-        Debug.Log("Supplie Page OK");
         suppliesPage.CheckButtons();
 
         suppliesPage.pageHead.text += "DAY " + timeManager.currentDay + ":\n";
 
-        // A mettre en enfant dun truc qui s'alligne ?
-        // member.journalVisual.SetActive(true);
-        
-
-            foreach(ItemData item in itemsManager.inventoryItems)
-            {
-                if(item.isSupplie)
-                {
-                    if(item.isFood)
-                    {
-                        foodItemData = item;
-                    }
-                    if(item.isDrink)
-                    {
-                        drinkItemData = item;
-                    }
-                    if(item.isHealKit)
-                    {
-                        healKitItemData = item;
-                    }
-            }
-
-            // if(itemsManager.food >= 1)
-            //     {
-            //         Debug.Log("itemsManager.food >= 1");
-            //         //Populate Slot FOOD avec Le AvailableVisual de l'Item
-            //         isFoodSlot.image.sprite = foodItemData.journalVisualAvailable;
-            //     }
-            //     else
-            //     {
-            //         Debug.Log("itemsManager.food else");
-            //         isFoodSlot.image.sprite = foodItemData.journalVisualUnAvailable;
-            //     }
-
-            //     if(itemsManager.drink >= 1)
-            //     {
-            //         Debug.Log("itemsManager.drink >=1");
-            //         //Populate Slot FOOD avec Le AvailableVisual de l'Item
-            //         isDrinkSlot.image.sprite = drinkItemData.journalVisualAvailable;
-            //     }
-
-            //     else
-            //     {
-            //         Debug.Log("itemsManager.drink else");
-            //         isDrinkSlot.image.sprite = drinkItemData.journalVisualUnAvailable;
-            //     }
-
-            //     if(itemsManager.healKit >= 1)
-            //     {
-            //         Debug.Log("itemsManager.heal>=1");
-            //         //Populate Slot FOOD avec Le AvailableVisual de l'Item
-            //         isHealSlot.image.sprite= healKitItemData.journalVisualAvailable;
-            //     }
-            //     else
-            //     {
-            //         Debug.Log("itemsManager.heal else");
-            //         isHealSlot.image.sprite = healKitItemData.journalVisualUnAvailable;
-            //     }
-            }
     }
-
 
     void PopulateNeedsPage() 
     {
-        Debug.Log("NEEDS Page OK");
         needsPage.CheckButtons();
-
         needsPage.pageHead.text += "DAY " + timeManager.currentDay + ":\n";
 
         foreach(Member member in teamManager.teamMembers)
@@ -426,21 +366,19 @@ public class DisplayJournal : MonoBehaviour
             }
         }
     }
+
     void PopulateEventPage()
     {
-        Debug.Log("Event Page OK");
         // eventGenerator.EventEnabler();
         eventGenerator.RandomizeEvent();
         // retrait du Page.CheckButton()
 
         // eventGenerator.currentEvent.completed = true;
         // eventGenerator.pastEvent = eventGenerator.currentEvent;
-
         eventPage.pageHead.text += "DAY " + timeManager.currentDay + ":\n";
         
         rnEvent = eventGenerator.currentEvent;
         eventPage.pageBody.text += rnEvent.description;
-
     }
 
     public void ApplyAction()

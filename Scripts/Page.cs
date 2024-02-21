@@ -14,6 +14,7 @@ public class Page: MonoBehaviour
     public Text pageHead;
     public Text pageBody;
 
+    public bool isMapPage;
     public bool isEventPage;
     public bool isNeedsPage;
     public bool isSuppliesPage;
