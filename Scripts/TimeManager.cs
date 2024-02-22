@@ -5,22 +5,31 @@ public class TimeManager : MonoBehaviour
 {
     public int currentDay = 1;
     public TeamManager teamManager;
+    public DisplayJournal displayJournal;
     public int arrivalDayTime;
     public int returnDayTime;
     public bool travelChecked = false;
 
    public void NextDay()
     {
-    currentDay += 1;
-    teamManager.AdjustTeamStats(-teamManager.feedRate, -teamManager.drinkRate, 0, 0);
-    teamManager.LifeCheck();
-    teamManager.DisplayTeam();
-
+        currentDay += 1;
+        teamManager.AdjustTeamStats(-teamManager.feedRate, -teamManager.drinkRate, 0, 0);
+        teamManager.LifeCheck();
+        //teamManager.DisplayTeam();
+        displayJournal.NewDay();
+        
         if(travelChecked)
         {
             OnTimeTravelTeam();
         }
+
+        foreach(Base aBase in teamManager.bases)
+        {
+            aBase.journalLoaded = false;
+        }
+
     }
+
    
     public void TravelCheck(int arrivalDay, int returnDay)
     {
@@ -41,7 +50,7 @@ public class TimeManager : MonoBehaviour
             {
                 foreach(Member travelingMember in teamManager.travelingMembers)
                 {
-                    teamManager.AddMember(travelingMember);
+                    teamManager.AddMember(travelingMember.baseComingFrom , travelingMember);
                     teamManager.travelingMembers.Remove(travelingMember);
                     travelChecked = false;
                 }

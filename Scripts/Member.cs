@@ -7,12 +7,15 @@ public class Member : ScriptableObject
     public Sprite journalVisual;
     public Sprite journalVisualHighlight;
     public Sprite gameVisual;
+    public Base baseComingFrom;
+    public Base baseLivingIn;
     public string fullname;
     public int physicalHealth;
     public int mentalHealth;
     public int hunger;
     public int thirst;
     public bool isInTeam;
+    public bool isPickUp;
     public bool selected;
     // public Member(string name, int physicalHealth, int mentalHealth, int hunger, int thirst)
     // {

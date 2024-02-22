@@ -8,6 +8,8 @@ public class MapCase: MonoBehaviour
     public Member member;
     public ItemsManager itemManager;
     public MapManager mapManager;
+    public TeamManager teamManager;
+    public DisplayJournal displayJournal;
     public Text eventName;
     public MapEvent[] mapEvent;
     public MapEvent thisCaseEvent;
@@ -26,6 +28,7 @@ public class MapCase: MonoBehaviour
     
     void Start()
     {
+
     }
     
     void OnCaseClick()
@@ -34,13 +37,12 @@ public class MapCase: MonoBehaviour
 
         if(this.isBaseFrom)
         {
-            Debug.Log("You can't travel to your base");
+            teamManager.OnLeaderClick();
         }
+        
         else
         {
-            // Afficher les boutons de confirmation ou non du voyage avec peut-être le display du jour.
-            // confirmClick où on appelle OnConfirmTravel(),
-            // cancel Clic où on supprime simplement l'affichage des boutons don le reverse d'ici;
+            displayJournal.travelButtons.SetActive(true);
         }
     }
 

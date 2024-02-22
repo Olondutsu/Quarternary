@@ -27,6 +27,7 @@ public class DisplayJournal : MonoBehaviour
 
     public GameObject parentGameObject;
     public GameObject memberPrefab;
+    public GameObject travelButtons;
 
     public Page eventPage;
     public Page needsPage;
@@ -47,16 +48,29 @@ public class DisplayJournal : MonoBehaviour
     void Start()
     {
         NewDay();
-        TeamPopulate();
-
+        // TeamPopulate();
         // PopulatePages();
+    }
+
+    public void ConfirmTravelClick()
+    {
+        travelButtons.SetActive(false);
+        mapManager.OnConfirmTravel();
+    }
+
+    public void CancelTravelClick()
+    {
+        travelButtons.SetActive(false);
     }
 
     public void OnOpenClick()
     {
-        journalDisplayed = !journalDisplayed;
-        eventPage.pageVisual.SetActive(true);
-        journal.SetActive(journalDisplayed);
+        if (selectedBase != null)
+        {
+            journalDisplayed = !journalDisplayed;
+            eventPage.pageVisual.SetActive(true);
+            journal.SetActive(journalDisplayed);
+        }
     }
 
     public void OnNextPageButtonClick()
@@ -91,7 +105,14 @@ public class DisplayJournal : MonoBehaviour
             AddIndex();
         }
 
-        if(journalIndex == 3 && readytoNextDay)
+        if(journalIndex == 4)
+        {
+            Debug.Log("journalIndex == 4");
+            mapPage.pageVisual.SetActive(true);
+            mapPage.CheckButtons();
+        }
+
+        if(journalIndex == 4 && readytoNextDay)
         {
             Debug.Log("journalDisplayed && teamInfosPageDisplayed && suppliesPageDisplayed && readytoNextDay");
         }
@@ -108,8 +129,8 @@ public class DisplayJournal : MonoBehaviour
     public void NewDay()
     {
         Debug.Log("NewDayCalled");
-        journalDisplayed = true;
-        PopulatePages();
+        // journalDisplayed = true;
+        // PopulatePages();
     }
 
     public void ResetJournal()
@@ -126,7 +147,6 @@ public class DisplayJournal : MonoBehaviour
         needsPage.pageVisual.SetActive(false);
         eventPage.pageVisual.SetActive(false);
 
-        Debug.Log("Reset du Journal");
         suppliesPage.pageHead.text = "\n";
         suppliesPage.pageBody.text =  "\n";
 
@@ -136,24 +156,25 @@ public class DisplayJournal : MonoBehaviour
         eventPage.pageHead.text = "\n";
         eventPage.pageBody.text =  "\n";
 
-        timeManager.NextDay();
-        NewDay();
+        if(!selectedBase.journalLoaded)
+        {
+            PopulatePages();
+        }
     }
 
     public void PopulatePages()
-    {
-        Debug.Log("PagePopulated");
-        
+    {   
+        PopulateMapPage();
         PopulateEventPage();
         PopulateNeedsPage();
         PopulateSuppliesPage();
     }
 
-    void TeamPopulate()
+    public void TeamPopulate()
     {
         int xOffset = 0;
 
-        foreach(ItemData item in itemsManager.inventoryItems)
+        foreach(ItemData item in selectedBase.itemsInBase)
         {
             if(item.isSupplie)
             {
@@ -264,16 +285,14 @@ public class DisplayJournal : MonoBehaviour
             }
         }
         // PreHeatSuppliePage();
+        selectedBase.journalLoaded = true;
     }
 
     void PopulateMapPage()
-    {
+    {   
+        mapPage.CheckButtons();
+        mapPage.pageHead.text += "WORLDMAP \n" + "DAY" + timeManager.currentDay;
         // Afficher les cases, les membres de la team aussi, faire en sortee que tout soit cliquable mais ça se fera sur le map Manager
-    }
-
-    void AddSupplieSlot(Member member)
-    {
-
     }
 
     void PopulateSuppliesPage() 

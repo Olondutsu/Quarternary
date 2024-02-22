@@ -22,8 +22,7 @@ public class EventGenerator : MonoBehaviour
     void Start()
     {
         EventChecker();
-        RandomizeEvent();
-        BaseChecker();
+        // BaseChecker();
     }
 
     public void BaseChecker()
@@ -140,19 +139,23 @@ public class EventGenerator : MonoBehaviour
 
      public void MemberHandler()
     {
-        foreach(Base aBase in teamManager.bases)
+        foreach(Member eventAddedMember in currentEvent.addedMember)
         {
-            foreach(Member eventAddedMember in currentEvent.addedMember)
+            if(currentEvent.addedMember != null)
             {
-                teamManager.AddMember(thisBase, eventAddedMember);
+            teamManager.AddMember(thisBase, eventAddedMember);
             }
+        }
                 
-            foreach(Member eventRemovedMember in currentEvent.removedMember)
+        foreach(Member eventRemovedMember in currentEvent.removedMember)
+        {
+            if(eventRemovedMember != null)
             {
-                    teamManager.RemoveMember(thisBase, eventRemovedMember);
+            teamManager.AddMember(thisBase, eventRemovedMember);
             }
         }
     }
 }
+
 
 

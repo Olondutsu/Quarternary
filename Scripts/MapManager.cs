@@ -60,22 +60,6 @@ public class MapManager : MonoBehaviour
     {
         travelText.text = travelTime + "DAYS";
     }
-    
-    public void OnClick()
-    {
-
-        // a deplacer dans MapCase ?
-        if(mapCase.isBaseFrom)
-        {
-            Debug.Log("You can't travel to your base");
-        }
-        else
-        {
-            // Afficher les boutons de confirmation ou non du voyage avec peut-être le display du jour.
-            // confirmClick où on appelle OnConfirmTravel(),
-            // cancel Clic où on supprime simplement l'affichage des boutons don le reverse d'ici;
-        }
-    }
 
     public void OnConfirmTravel()
     {

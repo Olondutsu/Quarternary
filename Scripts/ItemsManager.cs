@@ -25,7 +25,7 @@ public class ItemsManager : MonoBehaviour
     }
     public void InitializeItems()
     {
-        foreach(ItemData item in inventoryItems)
+        foreach(ItemData item in selectedBase.itemsInBase)
         {
             // Histoire de dire que les Items dans les Int sont les meme que ceux dans inventoryItems;
         }
@@ -33,7 +33,7 @@ public class ItemsManager : MonoBehaviour
 
     public void DisplayItemsVisual()
     {
-        foreach(ItemData item in inventoryItems)
+        foreach(ItemData item in selectedBase.itemsInBase)
         {
             //
         }
@@ -43,23 +43,21 @@ public class ItemsManager : MonoBehaviour
     {
         foreach(Member teamMember in selectedBase.membersInBase)
         {
-            foreach(ItemData item in inventoryItems)
+            if(usedItem.isFood)
             {
-                if(item.isFood)
-                {
-                    teamManager.FeedMember(teamMember, teamManager.feedRate);
-                }
+                teamManager.FeedMember(teamMember, teamManager.feedRate);
+            }
 
-                if(item.isDrink)
-                { 
-                    teamManager.UnthirstMember(teamMember, teamManager.drinkRate);
-                }
+            if(usedItem.isDrink)
+            { 
+                teamManager.UnthirstMember(teamMember, teamManager.drinkRate);
+            }
 
-                if(item.isHealKit)
-                {
-                    teamManager.HealMember(teamMember);
-                }
+            if(usedItem.isHealKit)
+            {
+                teamManager.HealMember(teamMember);
             }
         }
     }
 }
+
