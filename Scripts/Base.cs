@@ -13,5 +13,6 @@ public class Base : MonoBehaviour
     public bool journalLoaded;
     public bool isSelected;
     public bool available;
-    public bool displayed;
+    public bool displayed = false;
+    public bool isFull = false;
 }

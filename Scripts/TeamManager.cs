@@ -29,20 +29,31 @@ public class TeamManager : MonoBehaviour
     void Start()
     {
         OnBegin();
-        PickUpTeamMember();
     }
 
     // BASIC LIST MANIPULATION
     public void AddMember(Base aBase, Member addMember)
     {
         Debug.Log("AddMember appelé");
+        
+        if(aBase = null)
+        {
+            Debug.Log("aBase est bien null, dans AddMember");
+
+            GameObject go;
+
+            go = Instantiate(basePrefab, (parentDisplayBases.transform)) as GameObject;
+
+            go.transform.SetParent(parentDisplayBases.transform);
+
+            Base newBase = go.GetComponent<Base>();
+
+            CreateNewBase(newBase);
+        }
+
         aBase.membersInBase.Add(addMember);
         addMember.isInTeam = true;
-        
-        // if(aBase = null)
-        // {
-        //     CreateNewBase(aBase);
-        // }
+
         //DisplayTeam();
         CheckPopulation(); 
     }
@@ -68,6 +79,7 @@ public class TeamManager : MonoBehaviour
     {
         Debug.Log("RemoveBase appelé");
         bases.Remove(baseToRemove);
+        Destroy(baseToRemove.gameObject);
     }
 
     public void CheckPopulation()
@@ -107,7 +119,7 @@ public class TeamManager : MonoBehaviour
                 if(aBase != null)
                 {
                     // a deplacer car ça fout un boordel au niveau de la creation de base
-                    if (aBase.membersInBase.Count <= 4)
+                    if (aBase.membersInBase.Count >= 4)
                     {
                         Debug.Log("On crée une nouvelle Base dans le checkpopulation");
                         CreateNewBase(aBase); 
@@ -128,7 +140,20 @@ public class TeamManager : MonoBehaviour
     {
         // A revoir toute cette phase, il afut qu'on trouve le component Base de notre truc
         Base newBase = new Base();
+        
+        GameObject go;
+
+        go = Instantiate(basePrefab, (parentDisplayBases.transform)) as GameObject;
+
+        go.transform.SetParent(parentDisplayBases.transform);
+            
+        newBase = go.GetComponent<Base>();
+
         bases.Add(newBase);
+    
+        Debug.Log("NewBase n'est pas null dans OnBegin");
+
+
         Debug.Log("OnBeginESt fait ça appelle jsute 2 methode mtn");
         
         // DisplayBases();
@@ -149,12 +174,13 @@ public class TeamManager : MonoBehaviour
                 displayJournal.selectedBase = aBase;
                 eventGenerator.thisBase = aBase;
                 
-                CreateNewBase(aBase);
+                // CreateNewBase(aBase);
 
             }
-            else
+            else if (aBase.membersInBase.Count == 0)
             {
-                Debug.Log("aBase = nulld ans l echekckpopulation");
+                Destroy(aBase.gameObject);
+                Debug.Log("On destroy une aBase dans le gameobject car le membersInBase == 0");
             }
             if (child == null)
             {
@@ -170,40 +196,13 @@ public class TeamManager : MonoBehaviour
     // Pour build la team dès le début.
     public void PickUpTeamMember()
     {
-        Debug.Log("on calcul le random pickup"); 
-        // ajouter ici tout le truc du début où on peut chosiir entre 2 Member qui s'ajoutent a notre team.
-        int rand1 = Random.Range(0, everyMembers.Count);
-        int rand2 = Random.Range(0, everyMembers.Count);
-        int rand3 = Random.Range(0, everyMembers.Count);
+        Debug.Log("on calcul le random pickup");
         
-        // if (rand1 != rand2 && rand1 != rand2 && rand3 != rand2)
-        // {
-        Debug.Log("tous les rand sont different"); 
-        Member firstChoiceMember = everyMembers[rand1];
-        Member secondChoiceMember = everyMembers[rand2];
-        Member thirdChoiceMember = everyMembers[rand3];
+        ShuffleList(everyMembers);
 
-        if(firstChoiceMember != secondChoiceMember && firstChoiceMember != thirdChoiceMember && secondChoiceMember != thirdChoiceMember)
-        {
-            proposedMembers.Add(firstChoiceMember);
-            proposedMembers.Add(secondChoiceMember);
-            proposedMembers.Add(thirdChoiceMember);
-        }
-        // }
-        else
-        {
-            foreach(Member member in proposedMembers)
-            {
-                if(member != null)
-                {
-                proposedMembers.Remove(member);
-                break;
-                }
-            }
-
-                Debug.Log("sinon pick up team member (on recomence jusqu'à l'aléatoire ?) pour celle en Member");
-                PickUpTeamMember();
-        }
+        proposedMembers.Add(everyMembers[0]);
+        proposedMembers.Add(everyMembers[1]);
+        proposedMembers.Add(everyMembers[2]);
 
         int xOffset = 0;
 
@@ -234,7 +233,19 @@ public class TeamManager : MonoBehaviour
             proposedMember.isPickUp = true;
         }
 
-        DisplayBases();
+    }
+
+    private void ShuffleList<T>(List<T> list)
+    {
+        int n = list.Count;
+        while (n > 1)
+        {
+            n--;
+            int k = Random.Range(0, n + 1);
+            T value = list[k];
+            list[k] = list[n];
+            list[n] = value;
+        }
     }
 
     // // DISPLAY & UPDATE VISUALS
@@ -358,6 +369,7 @@ public class TeamManager : MonoBehaviour
                     Base teamBase = child.GetComponent<Base>();
 
                     bases.Add(teamBase);
+                    break;
                 }
                 break;
                 // bases.Remove(aBase);
