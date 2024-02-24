@@ -25,29 +25,32 @@ public class Page: MonoBehaviour
 
     public void CheckButtons()
     {
-        if(isEventPage)
+        if(displayJournal.journalDisplayed)
         {
-            if(eventGenerator.currentEvent.boolChoice)
+            if(isEventPage)
             {
-                Debug.Log("event is a bool choice");
-                yesButton.SetActive(true);
-                noButton.SetActive(true);
-                nextButton.SetActive(false);
+                if(eventGenerator.currentEvent.boolChoice)
+                {
+                    Debug.Log("event is a bool choice");
+                    yesButton.SetActive(true);
+                    noButton.SetActive(true);
+                    nextButton.SetActive(false);
+                }
+                else
+                {
+                    Debug.Log("event isnot a bool choice");
+                    yesButton.SetActive(false);
+                    noButton.SetActive(false);
+                    nextButton.SetActive(true);
+                }
             }
             else
             {
-                Debug.Log("event isnot a bool choice");
+                Debug.Log("not an event");
                 yesButton.SetActive(false);
                 noButton.SetActive(false);
                 nextButton.SetActive(true);
             }
-        }
-        else
-        {
-            Debug.Log("not an event");
-            yesButton.SetActive(false);
-            noButton.SetActive(false);
-            nextButton.SetActive(true);
         }
     }
 

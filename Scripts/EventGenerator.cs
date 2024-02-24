@@ -16,31 +16,23 @@ public class EventGenerator : MonoBehaviour
     public Slot slot;
     private ItemsManager itemManager;
     private TeamManager teamManager;
+    private DisplayJournal displayJournal;
 
     List<Event> availableEvents = new List<Event>();
 
     void Start()
     {
         EventChecker();
-        // BaseChecker();
-    }
 
-    public void BaseChecker()
-    {
-        foreach(Base aBase in teamManager.bases)
-        {
-            if(aBase.isSelected)
-            {
-                thisBase = aBase;
-            }
-        }
+        displayJournal = transform.GetComponent<DisplayJournal>();
+        itemManager = transform.GetComponent<ItemsManager>();
+        teamManager = transform.GetComponent<TeamManager>();
     }
 
     public void EventChecker()
     {
         foreach (Event ev in events)
         {
-            // on ajoute tous ceux qui ont la conditionMet a cette liste trjs dans le but de faire un random
             if (ev.conditionsMet)
             {
                 availableEvents.Add(ev);
@@ -56,33 +48,38 @@ public class EventGenerator : MonoBehaviour
 
      public void RandomizeEvent()
     {
-        foreach(Base aBase in teamManager.bases)
+        if(thisBase != null)
         {
-            if(aBase.isSelected)
+            if (availableEvents.Count == 0)
             {
-                if (availableEvents.Count == 0)
-                {
-                    Debug.LogError("Aucun événement disponible n'a conditionsMet à true.");
-                    return;
-                }
-                // Choisir un événement aléatoire parmi les événements disponibles
-                int randomIndex = Random.Range(0, availableEvents.Count);
-                currentEvent = availableEvents[randomIndex];
+                Debug.LogError("Aucun événement disponible n'a conditionsMet à true.");
+                return;
+            }
+            // Choisir un événement aléatoire parmi les événements disponibles
 
-                if (currentEvent.isMainEvent)
+            
+            int randomIndex = Random.Range(0, availableEvents.Count);
+            Debug.Log("On tire l'aléatoire" + randomIndex);
+            currentEvent = availableEvents[randomIndex];
+            Debug.Log("CurrentEvent =" + currentEvent.title);
+
+            if (currentEvent.isMainEvent)
+            {
+                // On desactive les autres main events si le currentEvent est un maiinEvent
+                foreach (Event unavailableEvents in events)
                 {
-                    // On desactive les autres main events si le currentEvent est un maiinEvent
-                    foreach (Event unavailableEvents in events)
+                    if (currentEvent.isMainEvent)
                     {
-                        if (currentEvent.isMainEvent)
-                        {
-                            unavailableEvents.conditionsMet = false;
-                            currentEvent.conditionsMet = true;
-                        }
+                        unavailableEvents.conditionsMet = false;
+                        currentEvent.conditionsMet = true;
                     }
                 }
-            } 
-        }
+            }
+            else
+            {
+                Debug.Log("SelectedBase est null randomizeEvent");
+            }
+        } 
     }
 
     public void EventEnabler()
@@ -143,17 +140,25 @@ public class EventGenerator : MonoBehaviour
         {
             if(currentEvent.addedMember != null)
             {
-            teamManager.AddMember(thisBase, eventAddedMember);
+                if(thisBase != null)
+                {
+                    teamManager.AddMember(thisBase, eventAddedMember);
+                }
             }
         }
+        
                 
         foreach(Member eventRemovedMember in currentEvent.removedMember)
         {
             if(eventRemovedMember != null)
             {
-            teamManager.AddMember(thisBase, eventRemovedMember);
+                teamManager.AddMember(thisBase, eventRemovedMember);
             }
         }
+        
+        displayJournal.TeamDepopulate();
+        displayJournal.TeamPopulate();
+        displayJournal.PopulatePages();
     }
 }
 

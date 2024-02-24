@@ -48,21 +48,19 @@ public class Slot: MonoBehaviour
         {
             if(slotMember.isPickUp)
             {
-                foreach(Member proposedMember in teamManager.proposedMembers)
-                {
-                    foreach(Base aBase in teamManager.bases)
-                    {
-                        
-                    }
-                    foreach(Transform child in teamManager.parentDisplayBases.transform)
-                    {
-                        Base teamBase = child.GetComponent<Base>();
 
-                        teamManager.AddMember(teamBase, proposedMember);
-                        teamManager.RandomizeLeader();
-                        break;
-                    }
+                // Base teamBase = transform.GetComponent<Base>();
+                if(teamManager.selectedBase != null)
+                {
+                    Debug.Log("teamManager.selected Base est pas null");
+                    teamManager.AddMember(teamManager.selectedBase, slotMember);
+                    teamManager.OnPickUpClick();
                 }
+                else
+                {
+                    Debug.Log("teamManager.selected Base est null");
+                }
+
             }
             else
             {

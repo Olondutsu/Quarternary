@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Net.Mail;
+using Microsoft.Unity.VisualStudio.Editor;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TeamManager : MonoBehaviour
 {
@@ -36,7 +38,7 @@ public class TeamManager : MonoBehaviour
     {
         Debug.Log("AddMember appelé");
         
-        if(aBase = null)
+        if(aBase == null)
         {
             Debug.Log("aBase est bien null, dans AddMember");
 
@@ -52,9 +54,12 @@ public class TeamManager : MonoBehaviour
         }
 
         aBase.membersInBase.Add(addMember);
+
+
         addMember.isInTeam = true;
 
         //DisplayTeam();
+        RandomizeLeader();
         CheckPopulation(); 
     }
 
@@ -79,6 +84,14 @@ public class TeamManager : MonoBehaviour
     {
         Debug.Log("RemoveBase appelé");
         bases.Remove(baseToRemove);
+
+
+        // Delete le visuel ? Ou plutôt mettre à jour avec le vide;
+        Slot slot = baseToRemove.transform.GetComponent<Slot>();
+        Base aBase = baseToRemove.transform.GetComponent<Base>();
+
+        slot.enabled = false;
+        aBase.enabled = false;
         Destroy(baseToRemove.gameObject);
     }
 
@@ -133,7 +146,7 @@ public class TeamManager : MonoBehaviour
                     }
                 }
         }
-        DisplayBases();
+        // DisplayBases();
     }
 
     public void OnBegin()
@@ -151,9 +164,6 @@ public class TeamManager : MonoBehaviour
 
         bases.Add(newBase);
     
-        Debug.Log("NewBase n'est pas null dans OnBegin");
-
-
         Debug.Log("OnBeginESt fait ça appelle jsute 2 methode mtn");
         
         // DisplayBases();
@@ -167,7 +177,7 @@ public class TeamManager : MonoBehaviour
 
             if(aBase != null)
             {
-                Debug.Log("aBase est different de nul checkpopulace");
+                Debug.Log("aBase est different de nul OnBegin");
 
                 slot.slotBase = aBase;
                 selectedBase = aBase;
@@ -221,16 +231,35 @@ public class TeamManager : MonoBehaviour
             goSlot.image.sprite = proposedMember.journalVisual;
             goSlot.slotMember = proposedMember;
 
-            foreach(Transform child in parentDisplayBases.transform)
+            foreach(Transform child in parentPickUp.transform)
             {
-                Debug.Log("Pour chaque enfant des parentsDisplayBases pour chaque joueurs proposés (normalement 3) gestion de slot du pickupteammember");
-                Base aBase = child.GetComponent<Base>();
-
-                goSlot.slotBase = aBase;
-                break;
+                // Base aBase = child.GetComponent<Base>();
+                Slot slot = child.GetComponent<Slot>();
+                
+                slot.slotBase = selectedBase;
+                
+                Debug.Log("Pour chaque enfant des parentsPickUp pour chaque joueurs proposés (normalement 3) gestion de slot du pickupteammember");
+                
             }
-
             proposedMember.isPickUp = true;
+        }
+
+    }
+
+    public void OnPickUpClick()
+    {
+        //Destroy
+        foreach(Transform child in parentPickUp.transform)
+        {
+            Slot slot = child.GetComponent<Slot>();
+            UnityEngine.UI.Image image = child.GetComponent<UnityEngine.UI.Image>();
+            slot.enabled = false;
+
+            Destroy(image);
+
+            Destroy(child.gameObject);
+
+
         }
 
     }
@@ -263,11 +292,30 @@ public class TeamManager : MonoBehaviour
         // ici on a bien raison d'utiliser le foreach abase
         foreach(Base aBase in bases)
         {
-            Debug.Log("For each Base in bases du RandomizeLeader");
-            int randomIndex = Random.Range(0, aBase.membersInBase.Count);
+            if(aBase.membersInBase.Count != 0)
+            {
+                if(aBase.squadLeader == null)
+                {
+                    Debug.Log("For each Base in bases du RandomizeLeader");
+                    int randomIndex = Random.Range(0, aBase.membersInBase.Count);
 
-            aBase.squadLeader = aBase.membersInBase[randomIndex];
-            squadLeaders.Add(aBase.squadLeader);
+                    aBase.squadLeader = aBase.membersInBase[randomIndex];
+                    squadLeaders.Add(aBase.squadLeader);
+
+                    foreach(Transform child in parentDisplayBases.transform)
+                    {
+                        Slot slot = child.GetComponent<Slot>();
+                        
+                        slot.image.sprite = aBase.squadLeader.journalVisual;
+
+                    }
+                }
+                else
+                {
+                    Debug.Log("There is already a leader for this squad");
+                }
+
+            }
         }
     }
 
@@ -393,7 +441,7 @@ public class TeamManager : MonoBehaviour
             {
                 // displayJournal.ResetJournal();
             }
-            displayJournal.TeamPopulate();
+            // displayJournal.TeamPopulate();
         }
     }
 

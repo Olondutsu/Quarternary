@@ -13,6 +13,7 @@ public class Event : ScriptableObject
     public bool isMainEvent;
     public bool conditionsMet;
     public bool completed;
+    public bool isEnd;
     public int delayDays;
     
 

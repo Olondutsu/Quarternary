@@ -4,6 +4,7 @@ using System.Collections;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEditor.Animations;
+using System.Collections.Generic;
 
 public class DisplayJournal : MonoBehaviour
 {
@@ -14,20 +15,23 @@ public class DisplayJournal : MonoBehaviour
     public MapManager mapManager;
 
     public GameObject journal;
-    public Event rnEvent;
+    private Event rnEvent;
 
     public ItemData foodItemData;
     public ItemData drinkItemData;
     public ItemData healKitItemData;
 
-    public Slot isHealSlot;
-    public Slot isFoodSlot;
-    public Slot isDrinkSlot;
-    public Slot isCharacterSlot;
+    private Slot isHealSlot;
+    private Slot isFoodSlot;
+    private Slot isDrinkSlot;
+    private Slot isCharacterSlot;
 
     public GameObject parentGameObject;
     public GameObject memberPrefab;
     public GameObject travelButtons;
+    public GameObject parentPages;
+    public GameObject pagePrefab;
+
 
     public Page eventPage;
     public Page needsPage;
@@ -36,9 +40,10 @@ public class DisplayJournal : MonoBehaviour
 
     public Base selectedBase;
 
+    public int maxCharPerPage = 250;
     public int pastIndex = 0;
     public int journalIndex = 0;
-    public bool eventDisplayed =false;
+    public bool eventDisplayed = false;
     public bool journalDisplayed = false;
     public bool teamInfosPageDisplayed = false;
     public bool suppliesPageDisplayed = false;
@@ -47,6 +52,7 @@ public class DisplayJournal : MonoBehaviour
 
     void Start()
     {
+        
         NewDay();
         // TeamPopulate();
         // PopulatePages();
@@ -65,16 +71,72 @@ public class DisplayJournal : MonoBehaviour
 
     public void OnOpenClick()
     {
+
         if (selectedBase != null)
         {
+
+            eventGenerator.RandomizeEvent();
             journalDisplayed = !journalDisplayed;
             eventPage.pageVisual.SetActive(true);
             journal.SetActive(journalDisplayed);
+            
+            foreach (Transform child in parentGameObject.transform)
+            {
+            PopulatePages();
+            break;
+            }
+            
+        }
+    }
+
+    //To instantiate pages/ REFONTE DU SYSTEME INITIAL NON UTILISE JUSQUA PRESENT
+    public void InitializePages()
+    {
+        int eventIndex = 0;
+        int needsIndex = 0;
+        int supplieIndex = 0;
+        int mapIndex = 0;
+
+        // creer ou mettre à jour une liste;
+        
+        if(eventGenerator.currentEvent != null)
+        {
+            if(eventGenerator.currentEvent.description.Length >= maxCharPerPage)
+            {
+                int amountOfPages = 0;
+
+                amountOfPages = eventGenerator.currentEvent.description.Length/maxCharPerPage;
+
+                for(int i = 0; i > amountOfPages; i++ )
+                {
+                    GameObject go;
+                    go = Instantiate(pagePrefab, (parentPages.transform)) as GameObject;
+                    go.transform.SetParent(parentPages.transform);
+
+                    Page goPage = go.GetComponent<Page>();
+                    goPage.isEventPage = true;
+                    eventIndex++;
+                }
+            }
         }
     }
 
     public void OnNextPageButtonClick()
     {
+        if(eventGenerator.currentEvent != null)
+        {
+            if(eventGenerator.currentEvent.isEnd && !eventGenerator.currentEvent.completed)
+            {
+                eventGenerator.currentEvent.completed = true;
+                eventGenerator.MemberHandler();
+            }
+        }
+
+        // int eventIndex;
+        // int needsIndex;
+        // int supplieIndex;
+        // int mapIndex;
+
         if(journalDisplayed)
         {
             Debug.Log("journalDisplayed");
@@ -83,10 +145,17 @@ public class DisplayJournal : MonoBehaviour
 
         if(journalIndex == 1)  
         {
-            Debug.Log("journalIndex == 1");
-            eventPage.pageVisual.SetActive(true);
-            eventPage.CheckButtons();
-            AddIndex();
+            if(eventGenerator.currentEvent != null)
+            {
+                Debug.Log("journalIndex == 1");
+                eventPage.pageVisual.SetActive(true);
+                eventPage.CheckButtons();
+                AddIndex();
+            }
+            else
+            {
+                AddIndex();
+            }
         }
 
         if(journalIndex == 2)
@@ -114,6 +183,7 @@ public class DisplayJournal : MonoBehaviour
 
         if(journalIndex == 4 && readytoNextDay)
         {
+            ApplyActions();
             Debug.Log("journalDisplayed && teamInfosPageDisplayed && suppliesPageDisplayed && readytoNextDay");
         }
     }
@@ -170,8 +240,10 @@ public class DisplayJournal : MonoBehaviour
         PopulateSuppliesPage();
     }
 
-    public void TeamPopulate()
+     public void TeamPopulate()
     {
+        List<Slot> slotList = new List<Slot>();
+
         int xOffset = 0;
 
         foreach(ItemData item in selectedBase.itemsInBase)
@@ -192,106 +264,146 @@ public class DisplayJournal : MonoBehaviour
                 }
             }
         }
+
         foreach(Member member in selectedBase.membersInBase)
         {
             GameObject go;
+
             xOffset += 3;
             go = Instantiate(memberPrefab, (parentGameObject.transform)) as GameObject;
-            // xOffset += 3;
-            // Vector3 spawnPosition = parentGameObject.transform.position + new Vector3(xOffset, 0, 0); 
-            // go = Instantiate(memberPrefab, spawnPosition, Quaternion.identity, parentGameObject.transform) as GameObject; 
 
-            // go.transform.parent = parentGameObject.transform;
             go.transform.SetParent(parentGameObject.transform);
 
-            foreach(Transform child in parentGameObject.transform)
+        }
+
+        foreach(Transform child in parentGameObject.transform)
+        {
+            Debug.Log(child);
+
+            Debug.Log("ForEach child de TeamPopulate, le premier forEach d'enfants");
+
+            foreach(Transform slotParents in child)
             {
-                foreach(Transform slotParents in child)
+                Debug.Log("ForEach child de TeamPopulate, le second forEach d'enfants");
+                Debug.Log(slotParents);
+                foreach(Transform slotChild in slotParents)
                 {
-                    foreach(Transform slotChild in slotParents)
+                    Debug.Log("ForEach child de TeamPopulate, le troisième foreach d'enfants");
+                    Debug.Log(slotChild);
+                    Slot slotScript = slotChild.GetComponent<Slot>();
+
+                    if(slotScript != null)
                     {
-                        Slot slotScript = slotChild.GetComponent<Slot>();
-                        
-                        if(slotScript != null)
-                        {
-                            if (slotScript.isCharacterSlot)
-                            {
-                                isCharacterSlot = slotScript;
-                                isCharacterSlot.image.sprite = member.journalVisual;
-                                slotScript.slotMember = member;
-                            }
-                        }
-                        else
-                        {
-                        }
+                        slotList.Add(slotScript);
+                        Debug.Log("Add " + slotScript + " To my list");
                     }
                 }
             }
         }
-           
-        foreach (Transform child in parentGameObject.transform)
+
+        int slotInt = -1;
+
+        foreach(Slot slot in slotList)
         {
-            foreach(Transform slotParent in child)
+            if(slot != null)
             {
-                foreach(Transform slotChild in slotParent)
+                if (slot.isCharacterSlot)
                 {
-                    Slot slot = slotChild.GetComponent<Slot>();
-                    if (slot != null)
+                    slotInt++;
+                    Debug.Log("slotInt  = " + slotInt);
+
+                    for(int i = 0; selectedBase.membersInBase.Count > i; i++ )
                     {
-                        if (slot.isHealKitSlot)
-                        {
-                            isHealSlot = slot;
-                            if(itemsManager.healKit >= 1)
-                            {
-                                slot.image.sprite= healKitItemData.journalVisualAvailable;
-                            }
-                            else
-                            {
-                                slot.image.sprite = healKitItemData.journalVisualUnAvailable;
-                            }
-                        }
+                            Debug.Log("ma condition chelou" + i );
+                            Member membrous = selectedBase.membersInBase[slotInt];
+                            Debug.Log("Membrous wesh : " + membrous);
+                    }
 
-                        if (slot.isFoodSlot)
-                        {
-                            isFoodSlot = slot;
-                            if(itemsManager.food >= 1)
-                            {
-                                slot.image.sprite = foodItemData.journalVisualAvailable;
-                            }
-                            else
-                            {
-                                slot.image.sprite = foodItemData.journalVisualUnAvailable;
-                            }
-                        }
-                                    
-                        if (slot.isDrinkSlot)
-                        {
-                            isDrinkSlot = slot;
-                            if(itemsManager.drink >= 1)
-                            {
-                                slot.image.sprite = drinkItemData.journalVisualAvailable;
-                            }
+                    foreach(Member member in selectedBase.membersInBase)
+                    {
+                        Debug.Log(member + "chaque member au milieu de mon truc ");
+                        slot.image.sprite = member.journalVisual;
+                        slot.slotMember = member;
+                    }
+                        Member slotMemb = selectedBase.membersInBase[slotInt];
+                        
+                        slot.image.sprite = slotMemb.journalVisual;
+                        slot.slotMember = slotMemb;
 
-                            else
-                            {
-                                slot.image.sprite = drinkItemData.journalVisualUnAvailable;
-                            }
-                        }
-                    }  
+                        Debug.Log("Member : " + slotMemb + " slot = " + slot + slotMemb);
+                }
+
+                if (slot.isHealKitSlot)
+                {
+                    isHealSlot = slot;
+
+                    if(itemsManager.healKit >= 1)
+                    {
+                        slot.image.sprite= healKitItemData.journalVisualAvailable;
+                    }
                     else
                     {
+                        slot.image.sprite = healKitItemData.journalVisualUnAvailable;
+                    }
+                }
+
+                if (slot.isFoodSlot)
+                {
+                    isFoodSlot = slot;
+
+                    if(itemsManager.food >= 1)
+                    {
+                        slot.image.sprite = foodItemData.journalVisualAvailable;
+                    }
+                    else
+                    {
+                        slot.image.sprite = foodItemData.journalVisualUnAvailable;
+                    }
+                }
+                            
+                if (slot.isDrinkSlot)
+                {
+                    isDrinkSlot = slot;
+
+                    if(itemsManager.drink >= 1)
+                    {
+                        slot.image.sprite = drinkItemData.journalVisualAvailable;
+                    }
+
+                    else
+                    {
+                        slot.image.sprite = drinkItemData.journalVisualUnAvailable;
                     }
                 }
             }
         }
-        // PreHeatSuppliePage();
+                
         selectedBase.journalLoaded = true;
+    }
+
+    public void TeamDepopulate()
+    {
+
+        foreach(Transform child in parentGameObject.transform)
+        {
+            Destroy(child.gameObject);
+
+            foreach(Transform slotParent in child)
+            {
+                Destroy(slotParent.gameObject);
+
+                foreach(Transform slotChild in slotParent)
+                {                      
+                    Destroy(slotChild.gameObject);
+                }
+            }
+        }
     }
 
     void PopulateMapPage()
     {   
         mapPage.CheckButtons();
-        mapPage.pageHead.text += "WORLDMAP \n" + "DAY" + timeManager.currentDay;
+        mapPage.pageHead.text = "WORLDMAP \n" + "DAY" + timeManager.currentDay;
         // Afficher les cases, les membres de la team aussi, faire en sortee que tout soit cliquable mais ça se fera sur le map Manager
     }
 
@@ -299,113 +411,65 @@ public class DisplayJournal : MonoBehaviour
     {
         suppliesPage.CheckButtons();
 
-        suppliesPage.pageHead.text += "DAY " + timeManager.currentDay + ":\n";
+        suppliesPage.pageHead.text = "DAY " + timeManager.currentDay + ":\n";
 
     }
 
     void PopulateNeedsPage() 
     {
         needsPage.CheckButtons();
-        needsPage.pageHead.text += "DAY " + timeManager.currentDay + ":\n";
+        needsPage.pageHead.text = "DAY " + timeManager.currentDay + ":\n";
+        needsPage.pageBody.text = "";
 
-        // refonte du système pour donner acces aux bases
         foreach(Member member in selectedBase.membersInBase)
         {
-            if(member.isInTeam)
-            {
+            
+            if(selectedBase.membersInBase != null){
+
+                // Add pronuns for each member
+                needsPage.pageBody.text += member.name;
+
                 // FOOD
-                if(member.hunger >= 5)
-                {
-                    needsPage.pageBody.text += member.name + "is fully feed.";
-                }
-                if(member.hunger < 5 && member.hunger >= 3)
-                {
-                    needsPage.pageBody.text += member.name + "would not mind to eat something.";
-                }
-                if(member.hunger < 3 && member.hunger >1)
-                {
-                    needsPage.pageBody.text += member.name + "begin to be hungry.";
-                }
-                if(member.hunger == 1)
-                {
-                    needsPage.pageBody.text += member.name + "will die if he don't eat.";
-                }
-                
-                if(member.hunger == 0)
-                {
-                    needsPage.pageBody.text += member.name + "died from hunger.";
-                }
+                if(member.hunger >= 5){needsPage.pageBody.text += " is fully feed,";}
+                if(member.hunger < 5 && member.hunger >= 3){needsPage.pageBody.text += " he would not mind to eat something,";}
+                if(member.hunger < 3 && member.hunger >1){needsPage.pageBody.text += " he begin to be hungry,";}
+                if(member.hunger == 1){needsPage.pageBody.text += " he will die if he don't eat,";}
+                if(member.hunger == 0){needsPage.pageBody.text += " he died from hunger,";}
 
                 // DRINK
-                if(member.thirst > 5)
-                {
-                    needsPage.pageBody.text += member.name + "is full of water.";
-                }
-                if(member.thirst < 5 && member.hunger > 3)
-                {
-                    needsPage.pageBody.text += member.name + "would not mind to drink a little something.";
-                }
-                if(member.thirst < 3 && member.hunger >1)
-                {
-                    needsPage.pageBody.text += member.name + "begin to be really thirsty.";
-                }
-                if(member.thirst == 1)
-                {
-                    needsPage.pageBody.text += member.name + "will die if he don't drink.";
-                }
-                if(member.thirst == 0)
-                {
-                    needsPage.pageBody.text += member.name + "died from thirst.";
-                }
+                if(member.thirst > 5){needsPage.pageBody.text += " is full of water,";}
+                if(member.thirst < 5 && member.hunger > 3){needsPage.pageBody.text += " he would not mind to drink a little something,";}
+                if(member.thirst < 3 && member.hunger >1){needsPage.pageBody.text +=  " he begin to be really thirsty,";}
+                if(member.thirst == 1){needsPage.pageBody.text += " he will die if he don't drink,";}
+                if(member.thirst == 0){needsPage.pageBody.text += " he died from thirst,";}
                 
                 // PHYSICALHEALTH
-                if(member.physicalHealth == 2)
-                {
-                    needsPage.pageBody.text += member.name + "is in perfect health";
-                }
-                if(member.physicalHealth == 1)
-                {
-                    needsPage.pageBody.text += member.name + "begin to be in a critical health";
-                }
-                if(member.physicalHealth == 0)
-                {
-                    needsPage.pageBody.text += member.name + "died from his physical health problems";
-                }
+                if(member.physicalHealth == 2){needsPage.pageBody.text += " he is in perfect health,";}
+                if(member.physicalHealth == 1){needsPage.pageBody.text += " he begin to be in a critical health,";}
+                if(member.physicalHealth == 0){needsPage.pageBody.text += " he died from his physical health problems,";}
 
                 // MENTALHEALTH
-                if(member.mentalHealth == 2)
-                {
-                    needsPage.pageBody.text += member.name + "is in perfect health";
-                }
-                if(member.mentalHealth == 1)
-                {
-                    needsPage.pageBody.text += member.name + "begin to be in a critical mental health problems";
-                }
-                if(member.mentalHealth == 0)
-                {
-                    needsPage.pageBody.text += member.name + "died due to mental illness";
-                }
+                if(member.mentalHealth == 2){needsPage.pageBody.text += " he is in perfect health,";}
+                if(member.mentalHealth == 1){needsPage.pageBody.text += " he begin to be in a critical mental health problems,";}
+                if(member.mentalHealth == 0){needsPage.pageBody.text += " he died due to mental illness,";}
             }
         }
     }
 
     void PopulateEventPage()
     {
-        // eventGenerator.EventEnabler();
-        eventGenerator.RandomizeEvent();
-        // retrait du Page.CheckButton()
-
         // eventGenerator.currentEvent.completed = true;
         // eventGenerator.pastEvent = eventGenerator.currentEvent;
-        eventPage.pageHead.text += "DAY " + timeManager.currentDay + ":\n";
+        eventPage.pageHead.text = "DAY " + timeManager.currentDay + ":\n";
         
         rnEvent = eventGenerator.currentEvent;
         eventPage.pageBody.text += rnEvent.description;
     }
 
-    public void ApplyAction()
+    public void ApplyActions()
     {
-        
+        TeamDepopulate();
+        TeamPopulate();
     }
 }
 
