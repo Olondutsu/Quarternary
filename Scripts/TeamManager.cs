@@ -357,14 +357,12 @@ public class TeamManager : MonoBehaviour
                             }
                             else
                             {
-                                Debug.Log("teamBase.membersInBase.Count > 0 && teamBase.displayed");
                                 Destroy(child);
                                 bases.Remove(teamBase);
                             }
                         }
                         else
                         {
-                            Debug.Log("teamBase != null && teamBase.displayed not true");
                             teamSlot.image.enabled = false;
                             teamSlot.enabled = false;
                             teamBase.enabled = false;
@@ -392,19 +390,16 @@ public class TeamManager : MonoBehaviour
                         }
                         else
                         {
-                            Debug.Log("Remove sur la fin du DisplayBases");
-                            // bases.Remove(aBase);
+
                         }
                     }
                 }
                 else
                 {
-                     Debug.Log("seconde condition du DisplayBases qui foire");
                 }
             }
             else
             {
-                Debug.Log("else debug de displaybases");
                 GameObject go;
                 xOffset += 3;
 
@@ -413,7 +408,6 @@ public class TeamManager : MonoBehaviour
 
                 foreach(Transform child in parentDisplayBases.transform)
                 {
-                    Debug.Log("Foreach child du else debug de displaybases");
                     Base teamBase = child.GetComponent<Base>();
 
                     bases.Add(teamBase);
@@ -429,7 +423,7 @@ public class TeamManager : MonoBehaviour
     public void OnLeaderClick()
     {
         Slot slot = parentDisplayBases.transform.GetComponentInChildren<Slot>();
-        Debug.Log("OnLeaderClickOmg");
+
         if(selectedBase != slot.slotBase)
         {
             slot.slotBase.isSelected = !slot.slotBase.isSelected;
@@ -440,8 +434,12 @@ public class TeamManager : MonoBehaviour
             if(!selectedBase.journalLoaded)
             {
                 // displayJournal.ResetJournal();
+                eventGenerator.RandomizeEvent();
+                displayJournal.ResetJournal();
+                displayJournal.InitializePages();
             }
             // displayJournal.TeamPopulate();
+            
         }
     }
 
@@ -509,6 +507,7 @@ public class TeamManager : MonoBehaviour
             {
                 selectedMembers.Add(selected);
                 // member.journalVisualHighlight.SetActive(true);
+
             }
             else
             {

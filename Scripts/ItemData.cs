@@ -8,7 +8,8 @@ using System.Collections;
 public class ItemData : ScriptableObject
 {
     [SerializeField]
-    public Sprite visual;
+    public GameObject gameVisual;
+    
      [SerializeField]
     public Sprite journalVisualAvailable;
      [SerializeField]

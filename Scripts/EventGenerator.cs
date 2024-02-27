@@ -19,6 +19,7 @@ public class EventGenerator : MonoBehaviour
     private DisplayJournal displayJournal;
 
     List<Event> availableEvents = new List<Event>();
+    List<Event> doneEvents = new List<Event>();
 
     void Start()
     {
@@ -36,36 +37,34 @@ public class EventGenerator : MonoBehaviour
             if (ev.conditionsMet)
             {
                 availableEvents.Add(ev);
-                Debug.Log(ev.title + " a les conditionsMet");
             }
             if (ev.completed)
             {
                 availableEvents.Remove(ev);
-                Debug.Log(ev.title + " est completed");
             }
         }
     }
 
      public void RandomizeEvent()
     {
-        if(thisBase != null)
-        {
+        // if(thisBase != null)
+        // {
             if (availableEvents.Count == 0)
             {
                 Debug.LogError("Aucun événement disponible n'a conditionsMet à true.");
                 return;
             }
-            // Choisir un événement aléatoire parmi les événements disponibles
-
+            // Choisir un événement aléatoire parmi les événements disponibles.
             
             int randomIndex = Random.Range(0, availableEvents.Count);
-            Debug.Log("On tire l'aléatoire" + randomIndex);
             currentEvent = availableEvents[randomIndex];
+            
+            Debug.Log("On tire l'aléatoire" + randomIndex);
             Debug.Log("CurrentEvent =" + currentEvent.title);
 
             if (currentEvent.isMainEvent)
             {
-                // On desactive les autres main events si le currentEvent est un maiinEvent
+                // On desactive les autres main events si le currentEvent est un mainEvent.
                 foreach (Event unavailableEvents in events)
                 {
                     if (currentEvent.isMainEvent)
@@ -75,11 +74,11 @@ public class EventGenerator : MonoBehaviour
                     }
                 }
             }
-            else
-            {
-                Debug.Log("SelectedBase est null randomizeEvent");
-            }
-        } 
+            // else
+            // {
+            //     Debug.Log("SelectedBase est null randomizeEvent");
+            // }
+        // }
     }
 
     public void EventEnabler()
@@ -91,7 +90,7 @@ public class EventGenerator : MonoBehaviour
             {
                 foreach(Event yesOutcomeAvailableEvents in currentEvent.yesOutcomeEvents)
                 {
-                yesOutcomeAvailableEvents.conditionsMet = true;
+                    yesOutcomeAvailableEvents.conditionsMet = true;
                 }
             }
 
@@ -99,7 +98,7 @@ public class EventGenerator : MonoBehaviour
             {
                 foreach(Event noOutcomeAvailableEvents in currentEvent.noOutcomeEvents)
                 {
-                noOutcomeAvailableEvents.conditionsMet = true;
+                    noOutcomeAvailableEvents.conditionsMet = true;
                 }
             }
         }

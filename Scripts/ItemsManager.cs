@@ -17,46 +17,67 @@ public class ItemsManager : MonoBehaviour
     public void AddItem(Base aBase, ItemData addItem)
     {
         aBase.itemsInBase.Add(addItem);
+        ItemCount();
     }
 
     public void RemoveItem(Base aBase, ItemData rmvItem)
     {
         aBase.itemsInBase.Remove(rmvItem);
-    }
-    public void InitializeItems()
-    {
-        foreach(ItemData item in selectedBase.itemsInBase)
-        {
-            // Histoire de dire que les Items dans les Int sont les meme que ceux dans inventoryItems;
-        }
+        ItemCount();
     }
 
     public void DisplayItemsVisual()
     {
         foreach(ItemData item in selectedBase.itemsInBase)
         {
-            //
+            item.gameVisual.SetActive(true);
         }
     }
     
-    public void OnUse(ItemData usedItem)
+    public void ItemCount()
     {
-        foreach(Member teamMember in selectedBase.membersInBase)
+        foreach(ItemData item in selectedBase.itemsInBase)
         {
-            if(usedItem.isFood)
+            if(item.isFood)
             {
-                teamManager.FeedMember(teamMember, teamManager.feedRate);
+                food++;
             }
 
-            if(usedItem.isDrink)
-            { 
-                teamManager.UnthirstMember(teamMember, teamManager.drinkRate);
-            }
-
-            if(usedItem.isHealKit)
+            if(item.isDrink)
             {
-                teamManager.HealMember(teamMember);
+               drink++; 
             }
+            
+            if(item.isHealKit)
+            {
+                healKit++;
+            }
+        }
+    }
+
+    // ajout d'un  Member ?,
+    public void OnUse(Member teamMember, ItemData usedItem)
+    {
+        if(usedItem.isFood)
+        {
+            teamManager.FeedMember(teamMember, teamManager.feedRate);
+            selectedBase.itemsInBase.Remove(usedItem);
+            ItemCount();
+
+        }
+
+        if(usedItem.isDrink)
+        { 
+            teamManager.UnthirstMember(teamMember, teamManager.drinkRate);
+            selectedBase.itemsInBase.Remove(usedItem);
+            ItemCount();
+        }
+
+        if(usedItem.isHealKit)
+        {
+            teamManager.HealMember(teamMember);
+            selectedBase.itemsInBase.Remove(usedItem);
+            ItemCount();
         }
     }
 }

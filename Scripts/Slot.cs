@@ -36,7 +36,10 @@ public class Slot: MonoBehaviour
     {
         if(slotItem != null)
         {
-            itemManager.OnUse(slotItem);
+            if(slotMember != null)
+            {
+                itemManager.OnUse(slotMember, slotItem);
+            }
         }
 
         if(slotBase != null)
