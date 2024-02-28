@@ -10,6 +10,7 @@ public class MapManager : MonoBehaviour
     public MapCase mapCase;
     public MapCase playerCase;
     public TeamManager teamManager;
+    public DisplayJournal displayJournal;
     
     public Text travelText;
     public int onTravel;
@@ -50,6 +51,7 @@ public class MapManager : MonoBehaviour
             mapCase.travelTime = xDistance + yDistance;
             onTravel = mapCase.travelTime/4 ;    
             DisplayTravel(onTravel);
+            OnClickTravel();
             // onTravel = onTravel;
         }
         // }
@@ -64,11 +66,16 @@ public class MapManager : MonoBehaviour
     public void OnConfirmTravel()
     {
         teamManager.OnTravel();
+        displayJournal.travelButtons.SetActive(false);
     }
-
+    public void OnCancelTravel()
+    {
+        displayJournal.travelButtons.SetActive(false);
+    }
     public void OnClickTravel()
     {
-        teamManager.OnTravel();
+        displayJournal.travelButtons.SetActive(true);
+        // teamManager.OnTravel();
     }
     
     public void DisplayCasesEvent()
