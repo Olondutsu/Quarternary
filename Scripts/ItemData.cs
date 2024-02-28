@@ -18,4 +18,5 @@ public class ItemData : ScriptableObject
     public bool isFood;
     public bool isDrink;
     public bool isHealKit;
+    public bool selected;
 }

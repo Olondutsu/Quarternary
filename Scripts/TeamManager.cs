@@ -258,8 +258,10 @@ public class TeamManager : MonoBehaviour
             Destroy(image);
 
             Destroy(child.gameObject);
-
-
+        }
+        foreach(Member proposedMember in proposedMembers)
+        {
+            proposedMember.isPickUp = false;
         }
 
     }
@@ -522,10 +524,10 @@ public class TeamManager : MonoBehaviour
     {
         foreach(Base aBase in bases)
         {
-            foreach(Member selectedMember in selectedMembers)
+            foreach(Member selectedMember in aBase.selectedMembers)
             {
                 RemoveMember(aBase, selectedMember);
-                travelingMembers.Add(selectedMember);
+                aBase.membersInTravel.Add(selectedMember);
                 selectedMember.isInTeam = false;
                 MemberDayCount();
                 timeManager.travelChecked = true;

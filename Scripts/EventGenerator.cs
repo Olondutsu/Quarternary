@@ -74,11 +74,6 @@ public class EventGenerator : MonoBehaviour
                     }
                 }
             }
-            // else
-            // {
-            //     Debug.Log("SelectedBase est null randomizeEvent");
-            // }
-        // }
     }
 
     public void EventEnabler()
@@ -88,19 +83,63 @@ public class EventGenerator : MonoBehaviour
         {
             if(currentEvent.completed && currentEvent.yesChoice)
             {
-                foreach(Event yesOutcomeAvailableEvents in currentEvent.yesOutcomeEvents)
+                foreach(Event anEvent in currentEvent.yesOutcomeEvents)
                 {
-                    yesOutcomeAvailableEvents.conditionsMet = true;
+                    anEvent.conditionsMet = true;
                 }
             }
 
             if(currentEvent.completed && currentEvent.noChoice)
             {
-                foreach(Event noOutcomeAvailableEvents in currentEvent.noOutcomeEvents)
+                foreach(Event anEvent in currentEvent.noOutcomeEvents)
                 {
-                    noOutcomeAvailableEvents.conditionsMet = true;
+                    anEvent.conditionsMet = true;
                 }
             }
+        }
+
+        if(currentEvent.successOutcome != null)
+        {
+            if(CheckFirePower(currentEvent))
+            {
+                foreach(Event anEvent in currentEvent.successOutcome)
+                {
+                    anEvent.conditionsMet = true;
+                }
+            }
+            else
+            {
+                foreach(Event anEvent in currentEvent.failOutcome)
+                {
+                    anEvent.conditionsMet = true;
+                }
+            }
+        }
+    }
+
+    private bool CheckFirePower(Event anEvent){
+        int firePowerGlobal = 0;
+        int firePowerEnnemy = anEvent.firePower;
+
+        foreach(Member member in selectedBase.membersInBase)
+        {
+            firePowerGlobal += member.firePower;
+        }
+        if(firePowerGlobal > firePowerEnnemy)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public void OutcomeManager()
+    {
+        if(currentEvent.isEnd)
+        {
+            currentEvent.completed = true;
         }
     }
 

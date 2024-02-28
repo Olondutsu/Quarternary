@@ -25,7 +25,9 @@ public class DisplayJournal : MonoBehaviour
     private Slot isHealSlot;
     private Slot isFoodSlot;
     private Slot isDrinkSlot;
-    private Slot isCharacterSlot;
+
+    List<Slot> slotList = new List<Slot>();
+
 
     public GameObject parentGameObject;
     public GameObject memberPrefab;
@@ -33,23 +35,17 @@ public class DisplayJournal : MonoBehaviour
     public GameObject parentPages;
     public GameObject pagePrefab;
 
-
-    public Page eventPage;
     public Page needsPage;
     public Page suppliesPage;
     public Page mapPage;
-
     public Base selectedBase;
 
     public int maxCharPerPage = 250;
     public int pastIndex = 0;
     public int journalIndex = 0;
-    public bool eventDisplayed = false;
     public bool journalDisplayed = false;
-    public bool teamInfosPageDisplayed = false;
-    public bool suppliesPageDisplayed = false;
-    public bool readytoNextDay = false;
 
+    private int index = 0;
     public int eventIndex = 0;
     public int needsIndex = 0;
     public int supplieIndex = 0;
@@ -61,8 +57,7 @@ public class DisplayJournal : MonoBehaviour
     {
         
         NewDay();
-        // TeamPopulate();
-        // PopulatePages();
+
     }
 
     public void ConfirmTravelClick()
@@ -94,14 +89,13 @@ public class DisplayJournal : MonoBehaviour
                 if(selectedBase.pagePrefab.Count > 0)
                 {
                     GameObject go = selectedBase.pagePrefab[0];
+                    // Page goPage = go.GetComponent<Page>();
+
                     go.SetActive(true);
+                    // goPage.CheckButtons();
+                
                     Debug.Log("if(selectedBase.pagePrefab.Count > 0");
                 }
-            }
-
-            if(journalIndex == 0)
-            {
-                AddIndex();
             }
             
             journalDisplayed = !journalDisplayed;
@@ -110,13 +104,13 @@ public class DisplayJournal : MonoBehaviour
         }
     }
 
-    //To instantiate pages/ REFONTE DU SYSTEME INITIAL NON UTILISE JUSQUA PRESENT
     public void InitializePages()
     {
         // creer ou mettre à jour une liste;
         
         if(eventGenerator.currentEvent != null)
         {
+
             Debug.Log("EventGenerator.currentEVent != null ");
             if(eventGenerator.currentEvent.description.Length >= maxCharPerPage)
             {
@@ -153,10 +147,39 @@ public class DisplayJournal : MonoBehaviour
                     selectedBase.pagePrefab.Add(goEvent);
                     eventIndex++;
             }
+
+            if(eventGenerator.currentEvent.hasImDis)
+            {
+                    GameObject goEvent;
+                    goEvent = Instantiate(pagePrefab, (parentPages.transform)) as GameObject;
+                    goEvent.transform.SetParent(parentPages.transform);
+
+                    Page goEventPage = goEvent.GetComponent<Page>();
+                    
+                    goEventPage.isEventPage = true;
+
+                    selectedBase.pagePrefab.Add(goEvent);
+
+                    eventIndex++;
+            }
         }
 
         if(selectedBase != null)
         {
+            //NeedPage
+            GameObject goNeed;
+
+            goNeed = Instantiate(pagePrefab, (parentPages.transform)) as GameObject;
+            goNeed.transform.SetParent(parentPages.transform);
+
+            Page goNeedPage = goNeed.GetComponent<Page>();
+
+            goNeedPage.isNeedsPage = true;
+            needsPage = goNeedPage;
+
+            selectedBase.pagePrefab.Add(goNeed);
+
+        }
             //Supplie Page
             GameObject goSupplie;
             goSupplie = Instantiate(pagePrefab, (parentPages.transform)) as GameObject;
@@ -172,356 +195,148 @@ public class DisplayJournal : MonoBehaviour
 
             supplieIndex++;
 
-            //NeedPage
-            GameObject goNeed;
 
-            goNeed = Instantiate(pagePrefab, (parentPages.transform)) as GameObject;
-            goNeed.transform.SetParent(parentPages.transform);
-
-            Page goNeedPage = goNeed.GetComponent<Page>();
-
-            goNeedPage.isNeedsPage = true;
-            needsPage = goNeedPage;
-
-            selectedBase.pagePrefab.Add(goNeed);
-        }
         foreach(GameObject go in selectedBase.pagePrefab)
         {
             Page goPage = go.GetComponent<Page>();
 
             goPage.eventGenerator = FindObjectOfType<EventGenerator>();
             goPage.displayJournal = FindObjectOfType<DisplayJournal>();
+
+            goPage.CheckButtons();
         }
 
         TeamPopulate();
         PopulatePages();
     }
 
-    public void OnNextPage(Page page)
+    public void OnNextPage()
     {
+        int indexCheck = index + 1;
+
         Debug.Log("OnNextPage Appelé");
 
         List<Page> eventPages = new List<Page>();
+        
+        GameObject go = selectedBase.pagePrefab[index];
+        Page page = go.GetComponent<Page>();
 
-        int eventPageIndex = 0;
-
-        if(page.isEventPage && journalDisplayed)
+        if(selectedBase.pagePrefab.Count > indexCheck)
         {
-            Debug.Log("if(page.isEventPage && journalDisplayed)");
+            Debug.Log("if(selectedBase.pagePrefab.Count > indexCheck)");
             
-            eventPages.Add(page);
+            index ++;
 
-            // il faut faire évoluer ça car on ajoute à cahque fois l'affichage de la prochaine page plutôt que sur le button de la page d'avant
-            // en gros là dans le else on met qu'on active la needsPage puis dans la needsPage qu'on active la suppliepage etc..
-            //voir directement la prochaien dans l'index car noramlement ils sont ajoutés à la liste dans le bon ordre
-            //Donc on setactive dans la liste genre pagesPrefab[currentIndex] en commençant l'index à 0
-            int index = 0;
+            GameObject goNext = selectedBase.pagePrefab[indexCheck];
+            Page goPageNext = goNext.GetComponent<Page>(); 
 
-            // index++;
-            int indexCheck = index + 1;
-
-            if(selectedBase.pagePrefab.Count >= indexCheck)
+            if(page.isSuppliesPage)
             {
-                Debug.Log("if(selectedBase.pagePrefab.Count > index)");
-
-                GameObject go = selectedBase.pagePrefab[index];
-                Page goPage = go.GetComponent<Page>();
-
-                
-
-                go.SetActive(true);
-
-                if(page == eventPages[eventPageIndex])
-                {
-                    Debug.Log("If page = eventPage[eventPageIndex]");
-                    page.gameObject.SetActive(true);
-                    page.CheckButtons();
-                    eventPageIndex++;
-                    AddIndex();
-                    index++;
-                }
-
-                else
-                {
-                    Debug.Log("else page != eventPage[eventPageIndex]");
-                    page.gameObject.SetActive(false);
-                }
-
-                if(page.isNeedsPage)
-                {
-                    Debug.Log("If Page is NeedsPage");
-                    
-                    if(journalIndex == eventIndex + 1)
-                    {
-                        Debug.Log("If (journalIndex == eventIndex + 1)");
-                        page.gameObject.SetActive(true);
-                        page.CheckButtons();
-                        AddIndex();
-                        index++;
-                    }
-                    else
-                    {
-
-                        Debug.Log("If (journalIndex!== eventIndex (" + eventIndex + ") + 1)");
-                        Debug.Log("Journal Index  " + journalIndex +  "  " +  eventIndex + "+1");
-                        page.gameObject.SetActive(false);
-
-                    }
-                }
-
-                if(page.isSuppliesPage)
-                {
-                    Debug.Log(" if(page.isSuppliesPage)");
-
-                    if(journalIndex == eventIndex + needsIndex + 1)
-                    {
-                        Debug.Log("if(journalIndex == eventIndex (" + eventIndex + "+ needsIndex (" +  needsIndex +  ") + 1)");
-                        page.parentGameObject.SetActive(true);
-                        page.gameObject.SetActive(true);
-                        page.CheckButtons();
-                        AddIndex();
-                        index++;
-                    }
-                    else
-                    {
-                        Debug.Log("else du if(journalIndex == eventIndex (" + eventIndex + "+ needsIndex (" +  needsIndex +  ") + 1");
-                        page.gameObject.SetActive(false);
-                    }
-                }
+                Debug.Log("IsSupplyPage");
+                page.parentGameObject.SetActive(true);
             }
             else
             {
-                Debug.Log("Else de if(selectedBase.pagePrefab.Count > indexCheck)");
+                Debug.Log("else is not SupplyPage");
+                page.parentGameObject.SetActive(false);
             }
-
-            // if(page = eventPages[eventPageIndex])
-            // {
-            //     Debug.Log("If page = eventPage[eventPageIndex]");
-            //     page.gameObject.SetActive(true);
-            //     page.CheckButtons();
-            //     eventPageIndex++;
-            //     AddIndex();
-            // }
-
-            // else
-            // {
-            //     Debug.Log("else page != eventPage[eventPageIndex]");
-            //     page.gameObject.SetActive(false);
-            // }
-        // }
-
-        
-        // if(page.isNeedsPage)
-        // {
-        //     Debug.Log("If Page is NeedsPage");
-        //     if(journalIndex == eventIndex + 1)
-        //     {
-        //         Debug.Log("If (journalIndex == eventIndex + 1)");
-        //         page.gameObject.SetActive(true);
-        //         page.CheckButtons();
-        //         AddIndex();
-        //     }
-
-        //     else
-        //     {
-        //         Debug.Log("If (journalIndex!== eventIndex (" + eventIndex + ") + 1)");
-        //         Debug.Log("Journal Index  " + journalIndex +  "  " +  eventIndex + "+1");
-        //         page.gameObject.SetActive(false);
+            if(page.isEventPage)
+            {
+                if(eventGenerator.currentEvent.hasImDis)
+                {
+                    eventGenerator.currentEvent.completed = true;
+                }
+            }
+            
+            if(goPageNext != null)
+            {
+                Debug.Log("GoPageNext != Null Les GO sont les suivants go " + go + "goNext" + goNext + "Index : " + index );
+                goNext.SetActive(true);
+                goPageNext.CheckButtons();
                 
-        //     }
-        // }
-    
-        // if(page.isSuppliesPage)
-        // {
-        //     Debug.Log(" if(page.isSuppliesPage)");
 
-        //     if(journalIndex == eventIndex + needsIndex + 1)
-        //     {
-        //         Debug.Log("if(journalIndex == eventIndex (" + eventIndex + "+ needsIndex (" +  needsIndex +  ") + 1)");
-        //         page.parentGameObject.SetActive(true);
-        //         page.gameObject.SetActive(true);
-        //         page.CheckButtons();
-        //         AddIndex();
-        //     }
-        //     else
-        //     {
-        //         Debug.Log("else du if(journalIndex == eventIndex (" + eventIndex + "+ needsIndex (" +  needsIndex +  ") + 1");
-        //         page.gameObject.SetActive(false);
-        //     }
-        // }
+            }
+            else
+            {
+                Debug.Log("GoPageNext = Null");
+            }
         }
+        else
+        {
+            foreach(GameObject gor in selectedBase.pagePrefab)
+            {
+                gor.SetActive(false);
+            }
+            Debug.Log("Ready for Next day");
+
+            timeManager.NextDay();
+            // en commentaire pour calmer les logs
+            // ApplyActions();
+            
+        }    
+    }
+
+    public void OnEndDay()
+    {
+
     }
 
     public void OnPreviousClick()
     {
-        foreach(GameObject go in selectedBase.pagePrefab)
-        {
-            Page goPage = go.GetComponent<Page>();
+        int pastIndex = index - 1;
 
-            List<Page> eventPages = new List<Page>();
+        GameObject go = selectedBase.pagePrefab[index];
 
-            int eventPageIndex = eventPages.Count;
-    
+        Page page = go.GetComponent<Page>();
 
-            if(goPage.isEventPage && journalDisplayed)
-            {
-                if(goPage = eventPages[eventPageIndex])
-                {
-                    go.SetActive(false);
-                    eventPageIndex--;
-                    RemoveIndex();
-                    
-                }
-            }
-            
-            if(goPage.isNeedsPage)
-            {
-                if(journalIndex == eventIndex + 1)
-                {
-                    go.SetActive(true);
-                    RemoveIndex();
-                    goPage.parentGameObject.SetActive(false);
-                }
-            }
-
-            if(goPage.isSuppliesPage)
-            {
-                if(journalIndex == eventIndex + needsIndex + 1)
-                {
-                    goPage.parentGameObject.SetActive(true);
-                    go.SetActive(true);
-                    RemoveIndex();
-                }
-            }
-
-        }
-    }
-
-    // public void OnNextPageButtonClick()
-    // {
-    //     if(eventGenerator.currentEvent != null)
-    //     {
-    //         if(eventGenerator.currentEvent.isEnd && !eventGenerator.currentEvent.completed)
-    //         {
-    //             eventGenerator.currentEvent.completed = true;
-    //             eventGenerator.MemberHandler();
-    //         }
-    //     }
-
-    //     if(journalDisplayed)
-    //     {
-    //         Debug.Log("journalDisplayed");
-    //         AddIndex();
-    //     }
-
-    //     if(journalIndex == 1)  
-    //     {
-    //         if(eventGenerator.currentEvent != null)
-    //         {
-    //             Debug.Log("journalIndex == 1");
-    //             eventPage.pageVisual.SetActive(true);
-    //             eventPage.CheckButtons();
-    //             AddIndex();
-    //         }
-    //         else
-    //         {
-    //             AddIndex();
-    //         }
-    //     }
-
-    //     if(journalIndex == eventIndex + 1)
-    //     {
-    //         Debug.Log("journalIndex == 2");
-    //         needsPage.pageVisual.SetActive(true);
-    //         needsPage.CheckButtons();
-    //         AddIndex();
-    //     }
-
-    //     if(journalIndex == eventIndex + needsIndex + 1)
-    //     {
-    //         suppliesPage.pageVisual.SetActive(true);
-    //         suppliesPage.CheckButtons();
-    //         AddIndex();
-    //     }
-
-    //     if(journalIndex == eventIndex + needsIndex + supplieIndex + 1)
-    //     {
-    //         Debug.Log("journalIndex == 4");
-    //         mapPage.pageVisual.SetActive(true);
-    //         mapPage.CheckButtons();
-    //     }
-
-    //     if(journalIndex == eventIndex + needsIndex + supplieIndex + mapIndex + 1 && readytoNextDay)
-    //     {
-    //         ApplyActions();
-    //         Debug.Log("journalDisplayed && teamInfosPageDisplayed && suppliesPageDisplayed && readytoNextDay");
-    //     }
-    // }
-    
-    public void AddIndex()
-    {
-        Debug.Log("AddIndex appelé, journal Index = " + journalIndex);
-        if(pastIndex == journalIndex)
-        {
-            Debug.Log("if(pastIndex == journalIndex) on ajoute un a l'index");
-            journalIndex++;
-        }
-    }
-    public void RemoveIndex()
-    {
-        if(pastIndex == journalIndex)
-        {
-            journalIndex--;
-        }
+        go.SetActive(false);
+        index--;
     }
 
     public void NewDay()
     {
         Debug.Log("NewDayCalled");
         eventGenerator.RandomizeEvent();
-        // journalDisplayed = true;
-        // PopulatePages();
+        index = 0;
+        ResetJournal();
     }
 
     public void ResetJournal()
     {
         if(selectedBase.journalLoaded)
         {
+            Debug.Log("if(selectedBase.journalLoaded)");
+            Debug.Log("selectedBase.pagePrefab.Count =  " + selectedBase.pagePrefab.Count );
 
-            readytoNextDay = false;
-            journalDisplayed = false;
-            teamInfosPageDisplayed = false;
-            suppliesPageDisplayed = false;
-            eventDisplayed = false;
-            journalIndex = 0;
-            pastIndex = 0;
+            while (selectedBase.pagePrefab.Count > 0)
+            {
+                Debug.Log("Pour chaque pagePrefab dans ..");
+                GameObject pagePrefab = selectedBase.pagePrefab[0];
+                selectedBase.pagePrefab.RemoveAt(0);
+                Destroy(pagePrefab);
+            }
 
-        foreach(GameObject pagePrefab in selectedBase.pagePrefab)
-        {
-            pagePrefab.SetActive(false);
-            selectedBase.pagePrefab.Remove(pagePrefab);
-        }
-
-        foreach(Page page in selectedBase.pagesForBase)
-        {
-            page.pageHead.text = "\n";
-            page.pageBody.text =  "\n";
-            selectedBase.pagesForBase.Remove(page);
-        }
-
-        InitializePages();
+            while (selectedBase.pagesForBase.Count > 0)
+            {
+                Debug.Log("Pour chaque pageforBases dans ..");
+                Page page = selectedBase.pagesForBase[0];
+                selectedBase.pagesForBase.RemoveAt(0);
+                Destroy(page.gameObject);
+            }
+        
+            // InitializePages();
         }
 
         else
         {
             Debug.Log("Wtf le journal n'est pas Loaded et on appelle le reset Journal, trouvez moi ce criminel");
-            InitializePages();
+            // InitializePages();
         }
     }
 
      public void TeamPopulate()
     {
-        List<Slot> slotList = new List<Slot>();
+        
 
         int xOffset = 0;
 
@@ -606,6 +421,7 @@ public class DisplayJournal : MonoBehaviour
 
                 if (slot.isHealKitSlot)
                 {
+                    slot.slotItem = healKitItemData;
                     isHealSlot = slot;
                     Debug.Log("Slot " + slot + " isHealKitSlot"); 
 
@@ -627,6 +443,7 @@ public class DisplayJournal : MonoBehaviour
 
                 if (slot.isFoodSlot)
                 {
+                    slot.slotItem = foodItemData;
                     isFoodSlot = slot;
                     Debug.Log("Slot " + slot + " isFoodSlot"); 
                     if(itemsManager.food >= 1)
@@ -646,6 +463,7 @@ public class DisplayJournal : MonoBehaviour
                             
                 if (slot.isDrinkSlot)
                 {
+                    slot.slotItem = drinkItemData;
                     isDrinkSlot = slot;
                     Debug.Log("Slot " + slot + " isDrinkSlot"); 
                     if(itemsManager.drink >= 1)
@@ -689,7 +507,7 @@ public class DisplayJournal : MonoBehaviour
 
     public void PopulatePages()
     {
-        int eventIndex = 0;
+        // int eventIndex = 0;
 
         foreach(GameObject go in selectedBase.pagePrefab)
         {
@@ -754,6 +572,37 @@ public class DisplayJournal : MonoBehaviour
             if(goPage.isEventPage)
             {
                 rnEvent = eventGenerator.currentEvent;
+                if(rnEvent.hasImDis)
+                {
+                    int indexCheck = index + 1 ; 
+                    GameObject goNext = selectedBase.pagePrefab[indexCheck];
+                    Page goPageNext = goNext.GetComponent<Page>(); 
+
+                    if(goPageNext.isEventPage)
+                    {
+                        if(rnEvent.boolChoice)
+                        {
+                            if(rnEvent.yesChoice)
+                            {
+                                int aBool = UnityEngine.Random.Range(0, rnEvent.yesOutcomeEvents.Length);
+                                Event imDisEvent = rnEvent.yesOutcomeEvents[aBool];
+                                goPageNext.pageBody.text = imDisEvent.description;
+                            }
+                            if(rnEvent.noChoice)
+                            {
+                                int aBool = UnityEngine.Random.Range(0, rnEvent.yesOutcomeEvents.Length);
+                                Event imDisEvent = rnEvent.noOutcomeEvents[aBool];
+                                goPageNext.pageBody.text = imDisEvent.description;
+                            }
+                        }
+                        else
+                        {
+                                int aBool = UnityEngine.Random.Range(0, rnEvent.yesOutcomeEvents.Length);
+                                Event imDisEvent = rnEvent.outcomeEvents[aBool];
+                                goPageNext.pageBody.text = imDisEvent.description;
+                        }
+                    }
+                }
 
                 if(go == selectedBase.pagePrefab[eventIndex])
                 {
@@ -773,14 +622,15 @@ public class DisplayJournal : MonoBehaviour
                         int charsToAdd = Mathf.Min(remainingChars, maxCharPerPage);
 
                         goPage.pageBody.text += rnEvent.description.Substring(startCharIndex, charsToAdd);
-                        eventIndex++;
                         
                         teamManager.selectedBase.pagesForBase.Add(goPage);
                     }
+
+
                 }
                 else
                 {
-                    Debug.Log("go != selectedBase.pagePrefab[eventIndex]");
+                    Debug.Log("go == selectedBase.pagePrefab[eventIndex], donc a priori c'est la derniere page d'events");
                 }
             }
 
@@ -789,6 +639,34 @@ public class DisplayJournal : MonoBehaviour
     }
     public void ApplyActions()
     {
+        foreach(Slot slot in slotList)
+        {
+            if(slot.slotItem != null)
+            {
+                ItemData item = slot.slotItem;
+                Member member = slot.slotMember;
+
+                if(item.selected)
+                {
+                    itemsManager.OnUse(slot.slotMember, item);
+                }
+            }
+        }
+        if(selectedBase.selectedMembers != null)
+        {
+            foreach(Member member in selectedBase.selectedMembers)
+            {
+                selectedBase.membersInBase.Remove(member);
+                selectedBase.membersInTravel.Add(member);
+
+            }
+        }
+        if(!eventGenerator.currentEvent.hasImDis)
+        {
+            eventGenerator.EventEnabler();
+            
+        }
+
         TeamDepopulate();
         TeamPopulate();
     }

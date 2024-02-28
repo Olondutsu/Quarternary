@@ -31,7 +31,7 @@ public class MapCase: MonoBehaviour
 
     }
     
-    void OnCaseClick()
+    public void OnCaseClick()
     {
         mapManager.CalculateMapDistance(this);
 

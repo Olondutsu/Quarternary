@@ -27,32 +27,29 @@ public class Page: MonoBehaviour
 
     public void CheckButtons()
     {
-        if(displayJournal.journalDisplayed)
+        if(isEventPage)
         {
-            if(isEventPage)
+            if(eventGenerator.currentEvent.boolChoice)
             {
-                if(eventGenerator.currentEvent.boolChoice)
-                {
-                    Debug.Log("event is a bool choice");
-                    yesButton.SetActive(true);
-                    noButton.SetActive(true);
-                    nextButton.SetActive(false);
-                }
-                else
-                {
-                    Debug.Log("event isnot a bool choice");
-                    yesButton.SetActive(false);
-                    noButton.SetActive(false);
-                    nextButton.SetActive(true);
-                }
+                Debug.Log("event is a bool choice");
+                yesButton.SetActive(true);
+                noButton.SetActive(true);
+                nextButton.SetActive(false);
             }
             else
             {
-                Debug.Log("not an event");
+                Debug.Log("event isnot a bool choice");
                 yesButton.SetActive(false);
                 noButton.SetActive(false);
                 nextButton.SetActive(true);
             }
+        }
+        else
+        {
+            Debug.Log("not an event");
+            yesButton.SetActive(false);
+            noButton.SetActive(false);
+            nextButton.SetActive(true);
         }
     }
 
@@ -98,7 +95,7 @@ public class Page: MonoBehaviour
         // }
 
         displayJournal.pastIndex = displayJournal.journalIndex;
-        displayJournal.OnNextPage(this);
+        displayJournal.OnNextPage();
 
 
     }

@@ -14,6 +14,7 @@ public class Member : ScriptableObject
     public int mentalHealth;
     public int hunger;
     public int thirst;
+    public int firePower;
     public bool isInTeam;
     public bool isPickUp;
     public bool selected;

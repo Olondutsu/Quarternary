@@ -90,6 +90,10 @@ public class MapManager : MonoBehaviour
     
     public void DisplayMap()
     {
+        // for(int i = 0 ; maxCasesCount; i++)
+        // {
+
+        // }
         // donner un Prefab avec une map en 32x32 (peut-être) puis ajouter un foreach MapCase, 
         // faire les verifications de là pour les afficher sur les bonnes cases, 
         // faire en sorte que ce soit cliquable et que ça affiche les trucs audessus etc;
