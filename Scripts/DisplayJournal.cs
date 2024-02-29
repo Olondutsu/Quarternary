@@ -303,34 +303,37 @@ public class DisplayJournal : MonoBehaviour
 
     public void ResetJournal()
     {
-        if(selectedBase.journalLoaded)
+        if(selectedBase != null)
         {
-            Debug.Log("if(selectedBase.journalLoaded)");
-            Debug.Log("selectedBase.pagePrefab.Count =  " + selectedBase.pagePrefab.Count );
-
-            while (selectedBase.pagePrefab.Count > 0)
+            if(selectedBase.journalLoaded)
             {
-                Debug.Log("Pour chaque pagePrefab dans ..");
-                GameObject pagePrefab = selectedBase.pagePrefab[0];
-                selectedBase.pagePrefab.RemoveAt(0);
-                Destroy(pagePrefab);
+                Debug.Log("if(selectedBase.journalLoaded)");
+                Debug.Log("selectedBase.pagePrefab.Count =  " + selectedBase.pagePrefab.Count );
+
+                while (selectedBase.pagePrefab.Count > 0)
+                {
+                    Debug.Log("Pour chaque pagePrefab dans ..");
+                    GameObject pagePrefab = selectedBase.pagePrefab[0];
+                    selectedBase.pagePrefab.RemoveAt(0);
+                    Destroy(pagePrefab);
+                }
+
+                while (selectedBase.pagesForBase.Count > 0)
+                {
+                    Debug.Log("Pour chaque pageforBases dans ..");
+                    Page page = selectedBase.pagesForBase[0];
+                    selectedBase.pagesForBase.RemoveAt(0);
+                    Destroy(page.gameObject);
+                }
+            
+                // InitializePages();
             }
 
-            while (selectedBase.pagesForBase.Count > 0)
+            else
             {
-                Debug.Log("Pour chaque pageforBases dans ..");
-                Page page = selectedBase.pagesForBase[0];
-                selectedBase.pagesForBase.RemoveAt(0);
-                Destroy(page.gameObject);
+                Debug.Log("Wtf le journal n'est pas Loaded et on appelle le reset Journal, trouvez moi ce criminel");
+                // InitializePages();
             }
-        
-            // InitializePages();
-        }
-
-        else
-        {
-            Debug.Log("Wtf le journal n'est pas Loaded et on appelle le reset Journal, trouvez moi ce criminel");
-            // InitializePages();
         }
     }
 

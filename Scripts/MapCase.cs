@@ -14,6 +14,7 @@ public class MapCase: MonoBehaviour
     public MapEvent[] mapEvent;
     public MapEvent thisCaseEvent;
     public List<MapEvent> mapEvents = new List<MapEvent>();
+    public MapCase instance;
 
     public int XCoordinate;
     public int YCoordinate;
@@ -26,16 +27,26 @@ public class MapCase: MonoBehaviour
 
     public bool isClicked;
     
-    void Start()
+    void Awake()
     {
 
+
+    }
+    void Start()
+    {
+        instance = this;
+        mapManager = FindObjectOfType<MapManager>();
+        teamManager = FindObjectOfType<TeamManager>();
+        itemManager = FindObjectOfType<ItemsManager>();
+        displayJournal = FindObjectOfType<DisplayJournal>();
+        eventName = GetComponentInChildren<Text>();
     }
     
     public void OnCaseClick()
     {
-        mapManager.CalculateMapDistance(this);
+        mapManager.CalculateMapDistance(instance);
 
-        if(this.isBaseFrom)
+        if(instance.isBaseFrom)
         {
             teamManager.OnLeaderClick();
         }
@@ -46,5 +57,9 @@ public class MapCase: MonoBehaviour
         }
     }
 
+    public void Bypass()
+    {
+        Start();
+    }
 }
 

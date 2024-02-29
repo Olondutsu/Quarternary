@@ -5,23 +5,44 @@ using UnityEngine.UI;
 
 public class MapManager : MonoBehaviour
 {
-    List<MapCase> mapCases = new List<MapCase>();
-
+    public List<MapCase> mapCases = new List<MapCase>();
+    public GameObject mapCasePrefab;
+    public GameObject mapButton;
+    public GameObject mapUI;
+    public bool mapUIActive = false;
     public MapCase mapCase;
     public MapCase playerCase;
     public TeamManager teamManager;
+    public Base baseCase;
     public DisplayJournal displayJournal;
+    public GameObject caseParent;
     
     public Text travelText;
+    public int caseYCount = 8;
+    public int caseXCount = 8;
     public int onTravel;
-
-    // THIS PART HAVE TO BEEN WORKED AGAIN,
+    public bool mapDisplayed = false;
     
+    public void Start()
+    {
+        // Case add to a list 
+        foreach(Transform child in caseParent.transform)
+        {
+            MapCase mapCase = child.GetComponent<MapCase>();
+            mapCases.Add(mapCase);
+            
+        }
 
-    //On Randomize la map,
+        displayJournal = FindObjectOfType<DisplayJournal>();
+        mapCase.Bypass();
+
+        // DefinePlayerCase();
+    }
+
     public void RandomizeCasesEvent()
     {
         // A REVOIR TOUTE CETTE FONCTION
+        // On va plutôt définir une mapCase pour chaque mapEvent, c'est plus logique
         foreach(MapCase mapCase in mapCases)
         {
             foreach(MapEvent mapEvent in mapCase.mapEvents)
@@ -40,6 +61,25 @@ public class MapManager : MonoBehaviour
         }
     }
 
+    public void DefinePlayerCase()
+    {
+        int randPC = Random.Range(0, mapCases.Count);
+        playerCase = mapCases[randPC];
+        playerCase.isFree = false;
+        playerCase.eventName.text += "Base";
+    }
+
+    public void OnMapClick()
+    {
+        mapDisplayed = !mapDisplayed;
+        mapUI.SetActive(mapDisplayed);
+        if(playerCase == null)
+        {
+            DefinePlayerCase();
+        }
+
+    }
+
     public void CalculateMapDistance(MapCase mapCase)
     {
         // foreach(MapCase mapCase in mapCases)
@@ -49,7 +89,7 @@ public class MapManager : MonoBehaviour
             int xDistance = Mathf.Abs(playerCase.XCoordinate - mapCase.XCoordinate);
             int yDistance = Mathf.Abs(playerCase.YCoordinate - mapCase.YCoordinate);
             mapCase.travelTime = xDistance + yDistance;
-            onTravel = mapCase.travelTime/4 ;    
+            onTravel = mapCase.travelTime/4 ;
             DisplayTravel(onTravel);
             OnClickTravel();
             // onTravel = onTravel;
@@ -95,14 +135,39 @@ public class MapManager : MonoBehaviour
         }
     }
     
-    public void DisplayMap()
+    public void PopulateMap()
     {
-        // for(int i = 0 ; maxCasesCount; i++)
-        // {
+        int mapCaseXIndex = 0;
+        int mapCaseYIndex = 0;
 
-        // }
-        // donner un Prefab avec une map en 32x32 (peut-être) puis ajouter un foreach MapCase, 
-        // faire les verifications de là pour les afficher sur les bonnes cases, 
-        // faire en sorte que ce soit cliquable et que ça affiche les trucs audessus etc;
+        for(int i = 0 ; i < caseYCount; i++)
+        {
+            GameObject goY;
+
+            goY = Instantiate(mapCasePrefab, (caseParent.transform)) as GameObject;
+            goY.transform.SetParent(caseParent.transform);
+            MapCase yCase = goY.GetComponent<MapCase>();
+
+            mapCaseYIndex++;
+            yCase.YCoordinate = mapCaseYIndex;
+
+            mapCases.Add(yCase);
+            
+
+            for(int y = 1; y > caseXCount; y++)
+            {
+                GameObject goX;
+
+                goX = Instantiate(mapCasePrefab, (caseParent.transform)) as GameObject;
+                goX.transform.SetParent(caseParent.transform);
+                MapCase xCase = goX.GetComponent<MapCase>();
+
+                mapCaseXIndex++;
+                xCase.XCoordinate = mapCaseXIndex;
+
+                mapCases.Add(xCase);
+                
+            }
+        }
     }
 }

@@ -78,6 +78,7 @@ public class TeamManager : MonoBehaviour
         // Base newBase = new Base();
         bases.Add(aBase);
         RandomizeLeader();
+        mapManager.DefinePlayerCase();
     }
 
     public void RemoveBase(Base baseToRemove)
