@@ -9,34 +9,72 @@ public class MapManager : MonoBehaviour
     public GameObject mapCasePrefab;
     public GameObject mapButton;
     public GameObject mapUI;
-    public bool mapUIActive = false;
+    public GameObject memberParent;
+    public GameObject memberPrefab;
+    
     public MapCase mapCase;
     public MapCase playerCase;
     public TeamManager teamManager;
     public Base baseCase;
+    public Base selectedBase;
     public DisplayJournal displayJournal;
+
     public GameObject caseParent;
+    public GameObject selectionPage;
+
+    public List<Slot> selectionSlots = new List<Slot>();
+
+    public Image image;
+
+    public Sprite treeCaseSprite;
+    public Sprite grassCaseSprite;
+    public Sprite mountainCaseSprite;
+    public Sprite baseCaseSprite;
     
     public Text travelText;
     public int caseYCount = 8;
     public int caseXCount = 8;
     public int onTravel;
     public bool mapDisplayed = false;
+    public bool mapUIActive = false;
     
     public void Start()
     {
-        // Case add to a list 
-        foreach(Transform child in caseParent.transform)
-        {
-            MapCase mapCase = child.GetComponent<MapCase>();
-            mapCases.Add(mapCase);
-            
-        }
-
         displayJournal = FindObjectOfType<DisplayJournal>();
-        mapCase.Bypass();
+        selectedBase = FindObjectOfType<Base>();
+        PopulateMap();
+        mapUI.SetActive(false);
+        
+    }
 
-        // DefinePlayerCase();
+    public void PopulateMemberSelection()
+    {
+        foreach(Member member in selectedBase.membersInBase)
+        {
+            if(member != null)
+            {
+                Debug.Log("Member n'est pas nulll Populate Member selection");
+                GameObject go;
+
+                go = Instantiate(memberPrefab, memberParent.transform);
+                go.transform.SetParent(memberParent.transform);
+                
+                Slot slot = go.GetComponent<Slot>();
+                slot.slotMember = member;
+                slot.isCharacterSlot = true;
+                slot.image.sprite = member.journalVisual;
+                selectionSlots.Add(slot);
+            }
+            else
+            {
+                Debug.Log("On détruit les child popualte member selection");
+                foreach(Transform child in memberParent.transform)
+                {
+                    Destroy(child.gameObject);
+                }
+            }
+
+        }
     }
 
     public void RandomizeCasesEvent()
@@ -61,12 +99,30 @@ public class MapManager : MonoBehaviour
         }
     }
 
+    public void PopulateCasesMember()
+    {
+        for (int i = 0; i < selectedBase.membersInBase.Count; i++)
+        {
+            int randomIndex = Random.Range(0, mapCases.Count);
+            MapCase randomCase = mapCases[randomIndex];
+
+            if(randomCase.isFree)
+            {
+                Member member = teamManager.everyMembers[i];
+                randomCase.member = member;
+                randomCase.isFree = false;
+
+                randomCase.notification.SetActive(true);
+            }
+        }
+    }
+
     public void DefinePlayerCase()
     {
         int randPC = Random.Range(0, mapCases.Count);
         playerCase = mapCases[randPC];
         playerCase.isFree = false;
-        playerCase.eventName.text += "Base";
+        playerCase.image.sprite = baseCaseSprite;
     }
 
     public void OnMapClick()
@@ -77,27 +133,20 @@ public class MapManager : MonoBehaviour
         {
             DefinePlayerCase();
         }
-
     }
 
     public void CalculateMapDistance(MapCase mapCase)
     {
-        // foreach(MapCase mapCase in mapCases)
-        // {
-        if(mapCase.isClicked)
-        {
-            int xDistance = Mathf.Abs(playerCase.XCoordinate - mapCase.XCoordinate);
-            int yDistance = Mathf.Abs(playerCase.YCoordinate - mapCase.YCoordinate);
-            mapCase.travelTime = xDistance + yDistance;
-            onTravel = mapCase.travelTime/4 ;
-            DisplayTravel(onTravel);
-            OnClickTravel();
-            // onTravel = onTravel;
-        }
-        // }
+        int xDistance = Mathf.Abs(playerCase.XCoordinate - mapCase.XCoordinate);
+        int yDistance = Mathf.Abs(playerCase.YCoordinate - mapCase.YCoordinate);
+        mapCase.travelTime = xDistance + yDistance;
+        onTravel = mapCase.travelTime/2;
+        onTravel++;
+
+        DisplayTravel(onTravel);
+        OnClickTravel();
     }
     
-    // Display le TravelTime,
     public void DisplayTravel(int travelTime)
     {
         travelText.text = travelTime + "DAYS";
@@ -107,20 +156,22 @@ public class MapManager : MonoBehaviour
     {
         teamManager.OnTravel();
         displayJournal.travelButtons.SetActive(false);
+        selectionPage.SetActive(false);
+
     }
     public void OnCancelTravel()
     {
         displayJournal.travelButtons.SetActive(false);
+        selectionPage.SetActive(false);
     }
     public void OnClickTravel()
     {
         displayJournal.travelButtons.SetActive(true);
-        // teamManager.OnTravel();
+        selectionPage.SetActive(true);
     }
     
     public void DisplayCasesEvent()
     {
-        // Ajouter un script Case et lui faire récupérer le Member member si il y en a un
         foreach(MapCase mapCase in mapCases)
         {
             if(mapCase.memberOccupied)
@@ -130,43 +181,72 @@ public class MapManager : MonoBehaviour
 
             if(mapCase.eventOccupied)
             {
-                // mapCase.eventName.text = mapCase.mapEvent.title;
+                
             }
         }
     }
     
     public void PopulateMap()
     {
-        int mapCaseXIndex = 0;
-        int mapCaseYIndex = 0;
+        float yOffset = 50f;
+        float xOffset = 50f;
 
-        for(int i = 0 ; i < caseYCount; i++)
+        for (int i = 0; i < caseYCount; i++)
         {
-            GameObject goY;
-
-            goY = Instantiate(mapCasePrefab, (caseParent.transform)) as GameObject;
-            goY.transform.SetParent(caseParent.transform);
-            MapCase yCase = goY.GetComponent<MapCase>();
-
-            mapCaseYIndex++;
-            yCase.YCoordinate = mapCaseYIndex;
-
-            mapCases.Add(yCase);
-            
-
-            for(int y = 1; y > caseXCount; y++)
+            for (int j = 0; j < caseXCount; j++)
             {
-                GameObject goX;
+                GameObject go;
 
-                goX = Instantiate(mapCasePrefab, (caseParent.transform)) as GameObject;
-                goX.transform.SetParent(caseParent.transform);
-                MapCase xCase = goX.GetComponent<MapCase>();
+                go = Instantiate(mapCasePrefab, caseParent.transform);
+                go.transform.SetParent(caseParent.transform);
 
-                mapCaseXIndex++;
-                xCase.XCoordinate = mapCaseXIndex;
+                MapCase mapCase = go.GetComponent<MapCase>();
+                mapCase.XCoordinate = j;
+                mapCase.YCoordinate = i;
 
-                mapCases.Add(xCase);
+                go.transform.position = new Vector3(j * xOffset, i * yOffset);
                 
+                mapCases.Add(mapCase);
+            }
+        }
+
+        foreach(MapCase mapCase in mapCases)
+        {
+            mapCase.DefineCasesAround();
+        }
+
+        int childCount = 0;
+
+       foreach(MapCase mapCase in mapCases)
+        {
+            float randomValue = Random.value;
+
+            float treeWeight = 0.1f;
+            float mountainWeight = 0.05f;
+            float grassWeight = 1f - treeWeight - mountainWeight;
+
+            foreach(MapCase neighbor in mapCase.neighbors)
+            {
+                if (neighbor.isTree)
+                    treeWeight += 0.1f; // Ajouter 2% de chance d'avoir un arbre si le voisin est un arbre
+                else if (neighbor.isMountain)
+                    mountainWeight += 0.05f; // Ajouter 1% de chance d'avoir une montagne si le voisin est une montagne
+            }
+
+            if (randomValue < treeWeight)
+            {
+                mapCase.isTree = true;
+                mapCase.image.sprite = treeCaseSprite;
+            }
+            else if (randomValue < treeWeight + mountainWeight)
+            {
+                mapCase.isMountain = true;
+                mapCase.image.sprite = mountainCaseSprite;
+            }
+            else
+            {
+                mapCase.isGrass = true;
+                mapCase.image.sprite = grassCaseSprite;
             }
         }
     }

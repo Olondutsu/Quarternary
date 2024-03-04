@@ -21,6 +21,7 @@ public class TeamManager : MonoBehaviour
     public Base selectedBase;
     public MapManager mapManager;
     public TimeManager timeManager;
+    public ItemsManager itemsManager;
     public DisplayJournal displayJournal;
     public EventGenerator eventGenerator;
     public GameObject parentDisplayBases;
@@ -30,9 +31,21 @@ public class TeamManager : MonoBehaviour
 
     void Start()
     {
+        itemsManager = FindObjectOfType<ItemsManager>();
         OnBegin();
+        InitializeMembersStats();
     }
 
+    public void InitializeMembersStats()
+    {
+        foreach(Member member in everyMembers)
+        {
+            member.thirst = 5;
+            member.hunger = 5;
+            member.physicalHealth = 5;
+            member.mentalHealth = 5;
+        }
+    }
     // BASIC LIST MANIPULATION
     public void AddMember(Base aBase, Member addMember)
     {
@@ -43,22 +56,21 @@ public class TeamManager : MonoBehaviour
             Debug.Log("aBase est bien null, dans AddMember");
 
             GameObject go;
-
             go = Instantiate(basePrefab, (parentDisplayBases.transform)) as GameObject;
-
             go.transform.SetParent(parentDisplayBases.transform);
-
             Base newBase = go.GetComponent<Base>();
+            
 
             CreateNewBase(newBase);
         }
 
         aBase.membersInBase.Add(addMember);
 
-
         addMember.isInTeam = true;
 
         //DisplayTeam();
+        addMember.baseLivingIn = aBase;
+        mapManager.PopulateMemberSelection();
         RandomizeLeader();
         CheckPopulation(); 
     }
@@ -114,6 +126,7 @@ public class TeamManager : MonoBehaviour
                     selectedBase = aBase;
                     displayJournal.selectedBase = aBase;
                     eventGenerator.thisBase = aBase;
+                    itemsManager.selectedBase = aBase;
                     
                     // CreateNewBase(aBase);
 
@@ -125,6 +138,7 @@ public class TeamManager : MonoBehaviour
                 }
             }
         }
+
 
         foreach(Transform child in parentDisplayBases.transform)
         {
@@ -156,19 +170,12 @@ public class TeamManager : MonoBehaviour
         Base newBase = new Base();
         
         GameObject go;
-
         go = Instantiate(basePrefab, (parentDisplayBases.transform)) as GameObject;
-
         go.transform.SetParent(parentDisplayBases.transform);
-            
         newBase = go.GetComponent<Base>();
-
         bases.Add(newBase);
-    
         Debug.Log("OnBeginESt fait ça appelle jsute 2 methode mtn");
         
-        // DisplayBases();
-
         foreach(Transform child in parentDisplayBases.transform)
         {
             Debug.Log("Pour chaque enfant "+ child + "de" + parentDisplayBases.transform);
@@ -184,6 +191,7 @@ public class TeamManager : MonoBehaviour
                 selectedBase = aBase;
                 displayJournal.selectedBase = aBase;
                 eventGenerator.thisBase = aBase;
+                itemsManager.selectedBase = aBase;
                 
                 // CreateNewBase(aBase);
 
@@ -242,6 +250,7 @@ public class TeamManager : MonoBehaviour
                 Debug.Log("Pour chaque enfant des parentsPickUp pour chaque joueurs proposés (normalement 3) gestion de slot du pickupteammember");
                 
             }
+
             proposedMember.isPickUp = true;
         }
 
@@ -254,17 +263,34 @@ public class TeamManager : MonoBehaviour
         {
             Slot slot = child.GetComponent<Slot>();
             UnityEngine.UI.Image image = child.GetComponent<UnityEngine.UI.Image>();
-            slot.enabled = false;
+            
+            if(slot !=  null)
+            {
+                Member slotMember = slot.slotMember;
+                slotMember.isPickUp = false;
+                
+                for(int i = 0; i  < selectedBase.membersInBase.Count; i++)
+                {
+                    if(slotMember != null)
+                    {
+                        if(slotMember == selectedBase.membersInBase[i] )
+                        {
+                            proposedMembers.Remove(slotMember);
+                            everyMembers.Remove(slotMember);
+                        }
+                        else
+                        {
+                            proposedMembers.Remove(slotMember);
+                        }
+                    }
+                }
 
-            Destroy(image);
-
-            Destroy(child.gameObject);
+                slot.enabled = false;
+                Destroy(image);
+                Destroy(child.gameObject);
+            }
         }
-        foreach(Member proposedMember in proposedMembers)
-        {
-            proposedMember.isPickUp = false;
-        }
-
+        
     }
 
     private void ShuffleList<T>(List<T> list)
@@ -286,7 +312,7 @@ public class TeamManager : MonoBehaviour
         foreach (Member member in selectedBase.membersInBase)
         {
             // member.gameVisual.SetActive(true);
-            OnSelectionClick(member);
+            // OnSelectionClick(member);
         }
     }
 
@@ -331,6 +357,7 @@ public class TeamManager : MonoBehaviour
             if(aBase != null)
             {
                 Debug.Log("ABas.membersInBase n'est pas null");
+
                 if(!aBase.displayed)
                 {
                     Debug.Log("ABase n'est pas displayed dans displayBase");
@@ -345,10 +372,9 @@ public class TeamManager : MonoBehaviour
 
                     foreach(Transform child in parentDisplayBases.transform)
                     {
-                        // Instantiate un Prefab ici d'un truc clickable qui contient chaque leader ?
+
                         Slot teamSlot = child.GetComponent<Slot>();
                         Base teamBase = child.GetComponent<Base>();
-
                         
                         if(teamBase != null && teamBase.displayed)
                         {
@@ -433,6 +459,7 @@ public class TeamManager : MonoBehaviour
             selectedBase = slot.slotBase;
             displayJournal.selectedBase = slot.slotBase;
             eventGenerator.thisBase = slot.slotBase;
+            itemsManager.selectedBase = slot.slotBase;
 
             if(!selectedBase.journalLoaded)
             {
@@ -442,7 +469,6 @@ public class TeamManager : MonoBehaviour
                 displayJournal.InitializePages();
             }
             // displayJournal.TeamPopulate();
-            
         }
     }
 
@@ -455,6 +481,7 @@ public class TeamManager : MonoBehaviour
                 if(member.hunger == 0|| member.thirst == 0 || member.physicalHealth == 0 || member.mentalHealth == 0)
                 {
                     aBase.membersInBase.Remove(member);
+                    Debug.Log(member + " died");
                 }
             }
         }
@@ -494,9 +521,13 @@ public class TeamManager : MonoBehaviour
     // SELECTION
     public void OnSelectionClick(Member selected)
     {
+        Debug.Log("OnSelectionClick du teamManager" + selected);
+
         selected.selected = !selected.selected;
+
         if(selected.selected)
         {
+            Debug.Log("selected selected" + selected);
             SelectMembers(selected);
         }
     }
@@ -504,35 +535,35 @@ public class TeamManager : MonoBehaviour
 
     public void SelectMembers(Member selected)
     {
-        foreach(Member member in selectedBase.membersInBase)
+        if(selected.selected)
         {
-            if(member.selected)
-            {
-                selectedMembers.Add(selected);
-                // member.journalVisualHighlight.SetActive(true);
+            // Base aBase = selected.BaseLivingIn;
+            // aBase.selectedMembers.Add(selected);
+            selectedMembers.Add(selected);
+            Debug.Log("Added to selected Member");
+            // member.journalVisualHighlight.SetActive(true);
+        }
 
-            }
-            else
-            {
-                selectedMembers.Remove(selected);
-                // member.journalVisualHighlight.SetActive(false);
-            }
+        else
+        {
+            selectedMembers.Remove(selected);
+            // member.journalVisualHighlight.SetActive(false);
         }
     }
 
     // ACTIONS
     public void OnTravel()
     {
-        foreach(Base aBase in bases)
+
+        foreach(Member selectedMember in selectedMembers)
         {
-            foreach(Member selectedMember in aBase.selectedMembers)
-            {
-                RemoveMember(aBase, selectedMember);
-                aBase.membersInTravel.Add(selectedMember);
-                selectedMember.isInTeam = false;
-                MemberDayCount();
-                timeManager.travelChecked = true;
-            }
+            Base aBase = selectedMember.baseLivingIn;
+            RemoveMember(aBase, selectedMember);
+            aBase.membersInTravel.Add(selectedMember);
+            selectedMember.isInTeam = false;
+            selectedMember.baseComingFrom = aBase;
+            timeManager.travelChecked = true;
+            MemberDayCount();
         }
     }
 
@@ -541,6 +572,7 @@ public class TeamManager : MonoBehaviour
         int arrivalDay = timeManager.currentDay + mapManager.onTravel;
         int returnDay = timeManager.currentDay + mapManager.onTravel + mapManager.onTravel;
         timeManager.TravelCheck(arrivalDay, returnDay);
+
     }
 
 }

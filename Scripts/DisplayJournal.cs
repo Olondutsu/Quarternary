@@ -106,8 +106,6 @@ public class DisplayJournal : MonoBehaviour
 
     public void InitializePages()
     {
-        // creer ou mettre à jour une liste;
-        
         if(eventGenerator.currentEvent != null)
         {
 
@@ -118,6 +116,8 @@ public class DisplayJournal : MonoBehaviour
                 int amountOfPages = 0;
 
                 amountOfPages = eventGenerator.currentEvent.description.Length/maxCharPerPage;
+
+                Debug.Log("Amount of Pages " + amountOfPages);
 
                 for(int i = 0; i > amountOfPages; i++ )
                 {
@@ -298,6 +298,7 @@ public class DisplayJournal : MonoBehaviour
         Debug.Log("NewDayCalled");
         eventGenerator.RandomizeEvent();
         index = 0;
+        eventIndex = 0;
         ResetJournal();
     }
 
@@ -310,6 +311,15 @@ public class DisplayJournal : MonoBehaviour
                 Debug.Log("if(selectedBase.journalLoaded)");
                 Debug.Log("selectedBase.pagePrefab.Count =  " + selectedBase.pagePrefab.Count );
 
+                
+                while (selectedBase.pagesForBase.Count > 0)
+                {
+                    Debug.Log("Pour chaque pageforBases dans ..");
+                    Page page = selectedBase.pagesForBase[0];
+                    selectedBase.pagesForBase.RemoveAt(0);
+                    Destroy(page.gameObject);
+                }
+
                 while (selectedBase.pagePrefab.Count > 0)
                 {
                     Debug.Log("Pour chaque pagePrefab dans ..");
@@ -318,13 +328,6 @@ public class DisplayJournal : MonoBehaviour
                     Destroy(pagePrefab);
                 }
 
-                while (selectedBase.pagesForBase.Count > 0)
-                {
-                    Debug.Log("Pour chaque pageforBases dans ..");
-                    Page page = selectedBase.pagesForBase[0];
-                    selectedBase.pagesForBase.RemoveAt(0);
-                    Destroy(page.gameObject);
-                }
             
                 // InitializePages();
             }
@@ -511,9 +514,11 @@ public class DisplayJournal : MonoBehaviour
     public void PopulatePages()
     {
         // int eventIndex = 0;
+        int eventIndx = 0;
 
         foreach(GameObject go in selectedBase.pagePrefab)
         {
+            Debug.Log("for  each voici le eventIndex = " + eventIndex + "et le eventIndx = " + eventIndx);
             Page goPage = go.GetComponent<Page>();
             
             if(goPage.isMapPage)
@@ -523,6 +528,7 @@ public class DisplayJournal : MonoBehaviour
 
                 teamManager.selectedBase.pagesForBase.Add(goPage);
             }
+
             if(goPage.isSuppliesPage)
             {
                     goPage.CheckButtons();
@@ -530,6 +536,7 @@ public class DisplayJournal : MonoBehaviour
                     goPage.pageHead.text = "DAY " + timeManager.currentDay + ":\n";
                     teamManager.selectedBase.pagesForBase.Add(suppliesPage);
             }
+
             if(goPage.isNeedsPage)
             {
                 goPage.CheckButtons();
@@ -569,14 +576,19 @@ public class DisplayJournal : MonoBehaviour
                         if(member.mentalHealth == 0){goPage.pageBody.text += " he died due to mental illness,";}
                     }
                 }
+
                 teamManager.selectedBase.pagesForBase.Add(goPage);
             }
 
             if(goPage.isEventPage)
             {
+                
+                eventIndx++;
+
                 rnEvent = eventGenerator.currentEvent;
                 if(rnEvent.hasImDis)
                 {
+                    Debug.Log("POPULATE EVENT rnEvent.hasImDis");
                     int indexCheck = index + 1 ; 
                     GameObject goNext = selectedBase.pagePrefab[indexCheck];
                     Page goPageNext = goNext.GetComponent<Page>(); 
@@ -587,12 +599,14 @@ public class DisplayJournal : MonoBehaviour
                         {
                             if(rnEvent.yesChoice)
                             {
+                                Debug.Log("POPULATE EVENT rnEvent.yeschoice");
                                 int aBool = UnityEngine.Random.Range(0, rnEvent.yesOutcomeEvents.Length);
                                 Event imDisEvent = rnEvent.yesOutcomeEvents[aBool];
                                 goPageNext.pageBody.text = imDisEvent.description;
                             }
                             if(rnEvent.noChoice)
                             {
+                                Debug.Log("POPULATE EVENT rnEvent.nochoice");
                                 int aBool = UnityEngine.Random.Range(0, rnEvent.yesOutcomeEvents.Length);
                                 Event imDisEvent = rnEvent.noOutcomeEvents[aBool];
                                 goPageNext.pageBody.text = imDisEvent.description;
@@ -600,6 +614,7 @@ public class DisplayJournal : MonoBehaviour
                         }
                         else
                         {
+                                Debug.Log("POPULATE EVENT rnEvent. notbool");
                                 int aBool = UnityEngine.Random.Range(0, rnEvent.yesOutcomeEvents.Length);
                                 Event imDisEvent = rnEvent.outcomeEvents[aBool];
                                 goPageNext.pageBody.text = imDisEvent.description;
@@ -607,19 +622,22 @@ public class DisplayJournal : MonoBehaviour
                     }
                 }
 
-                if(go == selectedBase.pagePrefab[eventIndex])
+                if(go == selectedBase.pagePrefab[0])
                 {
-                    Debug.Log("go == selectedBase.pagePrefab[eventIndex]");
+                    Debug.Log("POPULATE EVENT go == selectedBase.pagePrefab[0]");
                     goPage.pageHead.text = "DAY " + timeManager.currentDay + ":\n";
 
                     if(rnEvent.description.Length <= maxCharPerPage)
                     {
+                        Debug.Log("(POPULATE EVENT if dscription <= maxCharPerPage");
                         goPage.pageBody.text += rnEvent.description;
 
                         teamManager.selectedBase.pagesForBase.Add(goPage);
                     }
                     else
                     {
+                        Debug.Log("(POPULATE EVENT else la descripton est plus petite que maxCharPerPage");
+
                         int startCharIndex = eventIndex * maxCharPerPage;
                         int remainingChars = rnEvent.description.Length - startCharIndex;
                         int charsToAdd = Mathf.Min(remainingChars, maxCharPerPage);
@@ -628,12 +646,19 @@ public class DisplayJournal : MonoBehaviour
                         
                         teamManager.selectedBase.pagesForBase.Add(goPage);
                     }
-
-
                 }
                 else
                 {
-                    Debug.Log("go == selectedBase.pagePrefab[eventIndex], donc a priori c'est la derniere page d'events");
+                    Debug.Log("(POPULATE EVENT else donc go != selectedBase.pagePrefab[0])");
+                }
+                
+                if(eventIndx < eventIndex)
+                {
+                    Debug.Log("(POPULATE EVENT eventIndx < eventIndex)");
+                }
+                else
+                {
+                    Debug.Log("POPULATE EVENT donc a priori c'est la derniere page d'events");
                 }
             }
 
@@ -674,4 +699,3 @@ public class DisplayJournal : MonoBehaviour
         TeamPopulate();
     }
 }
-

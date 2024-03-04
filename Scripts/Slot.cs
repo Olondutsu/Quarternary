@@ -11,6 +11,8 @@ public class Slot: MonoBehaviour
     public GameObject gameManager;
     public ItemsManager itemManager;
     public TeamManager teamManager;
+    public MapManager mapManager;
+
     public Member slotMember;
     public Base slotBase;
     public bool isHealKitSlot;
@@ -24,16 +26,28 @@ public class Slot: MonoBehaviour
     {
         itemManager = FindObjectOfType<ItemsManager>();
         teamManager = FindObjectOfType<TeamManager>();
+        mapManager = FindObjectOfType<MapManager>();
     }
 
     void Start()
     {
         itemManager = FindObjectOfType<ItemsManager>();
         teamManager = FindObjectOfType<TeamManager>();
+        mapManager = FindObjectOfType<MapManager>();
     }
 
     public void OnSlotClick()
     {
+        for(int i = 0; i < mapManager.selectionSlots.Count; i++)
+        {
+            if(this == mapManager.selectionSlots[i])
+            {
+                Debug.Log("Oura on a trouvé l ebon mais alors quel est le pb ?   " + slotMember);
+                
+                teamManager.OnSelectionClick(slotMember);
+            }
+        }
+
         if(slotItem != null)
         {
             if(slotMember != null)
@@ -49,6 +63,7 @@ public class Slot: MonoBehaviour
 
         if(slotMember != null)
         {
+            
             if(slotMember.isPickUp)
             {
 
@@ -67,7 +82,7 @@ public class Slot: MonoBehaviour
             }
             else
             {
-                teamManager.OnSelectionClick(slotMember);
+                // teamManager.OnSelectionClick(slotMember);
             }
         }
     }

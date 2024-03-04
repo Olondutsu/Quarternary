@@ -157,7 +157,7 @@ public class EventGenerator : MonoBehaviour
 
         foreach(ItemData neededItems in currentEvent.neededItems)
         {
-            foreach(ItemData ownedItems in itemManager.inventoryItems)
+            foreach(ItemData ownedItems in thisBase.itemsInBase)
             {
             // A modifier, ici ptet créer une liste d'Items pour verifier si ya bien les items dans l'inventaire blblbla
                 if(ownedItems == neededItems) 
@@ -199,6 +199,3 @@ public class EventGenerator : MonoBehaviour
         displayJournal.PopulatePages();
     }
 }
-
-
-

@@ -9,8 +9,7 @@ public class ItemsManager : MonoBehaviour
     public int food;
     public int drink;
     public int money;
-    
-    public List<ItemData> inventoryItems = new List<ItemData>();
+
     public Base selectedBase;
     public TeamManager teamManager;
 
@@ -81,4 +80,3 @@ public class ItemsManager : MonoBehaviour
         }
     }
 }
-

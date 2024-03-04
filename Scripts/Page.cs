@@ -66,34 +66,6 @@ public class Page: MonoBehaviour
     }
     public void OnNextClick()
     {
-        // if(displayJournal.journalDisplayed)
-        // {
-        //     Debug.Log("journalDisplayed = true on met eventDisplay true");
-        //     displayJournal.eventDisplayed = true;
-        // }
-
-        // if(displayJournal.journalIndex == 1)
-        // {
-        //     Debug.Log("displayJournal.journalIndex == 1");
-        //     displayJournal.teamInfosPageDisplayed = true;
-        // }
-
-        // if(displayJournal.journalIndex == 2)
-        // {
-        //     Debug.Log("displayJournal.journalIndex == 2");
-        //     displayJournal.suppliesPageDisplayed = true;
-        // }
-        // if(displayJournal.journalIndex == 3)
-        // {
-        //     Debug.Log("displayJournal.journalIndex == 3");
-        //     displayJournal.readytoNextDay = true;
-        // }
-        // if(displayJournal.teamInfosPageDisplayed && displayJournal.teamInfosPageDisplayed && displayJournal.journalDisplayed && displayJournal.readytoNextDay)
-        // {
-        //     Debug.Log("confirmation du readytoNextday");
-        //     displayJournal.ResetJournal();
-        // }
-
         displayJournal.pastIndex = displayJournal.journalIndex;
         displayJournal.OnNextPage();
 
