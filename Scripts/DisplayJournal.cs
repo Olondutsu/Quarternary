@@ -26,6 +26,9 @@ public class DisplayJournal : MonoBehaviour
     private Slot isFoodSlot;
     private Slot isDrinkSlot;
 
+    public GameObject transitionPanel;
+    public Text transiDayText;
+
     List<Slot> slotList = new List<Slot>();
 
 
@@ -56,7 +59,7 @@ public class DisplayJournal : MonoBehaviour
     void Start()
     {
         
-        NewDay();
+        timeManager.NextDay();
 
     }
 
@@ -295,10 +298,14 @@ public class DisplayJournal : MonoBehaviour
 
     public void NewDay()
     {
+        Animation anim = transitionPanel.GetComponent<Animation>();
         Debug.Log("NewDayCalled");
         eventGenerator.RandomizeEvent();
         index = 0;
         eventIndex = 0;
+        transitionPanel.SetActive(true);
+        transiDayText.text = "Days : " + timeManager.currentDay;
+        anim.Play("transition");
         ResetJournal();
     }
 

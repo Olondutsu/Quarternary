@@ -13,6 +13,7 @@ public class TimeManager : MonoBehaviour
     public void Start()
     {
         teamManager = FindObjectOfType<TeamManager>();
+        currentDay = 1;
     }
 
    public void NextDay()
@@ -33,10 +34,11 @@ public class TimeManager : MonoBehaviour
         //teamManager.DisplayTeam();
         displayJournal.NewDay();
         
-        if(travelChecked)
-        {
-            OnTimeTravelTeam();
-        }
+        // Il faut que je fasse ça ailleurs
+        // if(travelChecked)
+        // {
+        //     OnTimeTravelTeam();
+        // }
 
         foreach(Base aBase in teamManager.bases)
         {
@@ -53,9 +55,11 @@ public class TimeManager : MonoBehaviour
 
     public void OnTimeTravelTeam()
     {   
+        Debug.Log("arrivalDayTime " + arrivalDayTime + "&& ReturnDayTime" + returnDayTime);
         if(travelChecked)
         {
             int membersCount = 0;
+            bool arrived = false;
 
             // Member count to check if you still have one member in a base or if we skip days;
             foreach(Base aBase in teamManager.bases)
@@ -71,24 +75,35 @@ public class TimeManager : MonoBehaviour
                 Debug.Log("membersCount == 0");
                 for(int i = currentDay; i <= arrivalDayTime; i++)
                 {
+                    Debug.Log("currentDay " + currentDay + "&& arrivalDayTime" + arrivalDayTime + "i = " + i );
                     // Display l'event du lieu d'arriver
                     NextDay();
-                    Debug.Log("Arrivé sur les lieux de l'event, jour = " + currentDay);
-                }
-
-                for(int i = currentDay; i <= returnDayTime; i++)
-                {
-                    NextDay();
-
-                    if(i == returnDayTime)
+                    if( i >= arrivalDayTime)
                     {
-                        foreach(Member travelingMember in teamManager.travelingMembers)
+
+                        arrived = true;
+                        Debug.Log("Arrivé sur les lieux de l'event, jour = " + currentDay);
+                        OnTimeTravelTeam();
+                    }
+                }
+                
+                if(arrived)
+                {
+                    for(int i = currentDay; i <= returnDayTime; i++)
+                    {
+                        Debug.Log("currentDay " + currentDay + "&& ReturnDayTime" + returnDayTime + "i = " + i );
+                        NextDay();
+
+                        if(i >= returnDayTime)
                         {
-                            teamManager.AddMember(travelingMember.baseComingFrom , travelingMember);
-                            teamManager.travelingMembers.Remove(travelingMember);
-                            
-                            Debug.Log("retour à la baraque " + currentDay);
-                            travelChecked = false;
+                            foreach(Member travelingMember in teamManager.travelingMembers)
+                            {
+                                teamManager.AddMember(travelingMember.baseComingFrom , travelingMember);
+                                teamManager.travelingMembers.Remove(travelingMember);
+                                
+                                Debug.Log("retour à la baraque " + currentDay);
+                                travelChecked = false;
+                            }
                         }
                     }
                 }

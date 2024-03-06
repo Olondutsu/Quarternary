@@ -18,6 +18,9 @@ public class Member : ScriptableObject
     public bool isInTeam;
     public bool isPickUp;
     public bool selected;
+    public bool arrived;
+    public bool returned;
+    
     // public Member(string name, int physicalHealth, int mentalHealth, int hunger, int thirst)
     // {
     //     Name = name;

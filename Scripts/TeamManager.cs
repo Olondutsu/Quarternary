@@ -564,7 +564,28 @@ public class TeamManager : MonoBehaviour
             selectedMember.baseComingFrom = aBase;
             timeManager.travelChecked = true;
             MemberDayCount();
+            mapManager.PopulateMemberSelection();
+            
+            // selectedMembers.Remove(selectedMember);
         }
+        for (int i = 0; i < selectedMembers.Count; i++)
+        {
+            Member member = selectedMembers[i];
+            selectedMembers.Remove(member);
+
+            foreach(Transform child in mapManager.memberParent.transform)
+            {
+                Debug.Log("(Transform child in mapManager.memberParent.transform)");
+                Slot slot = child.GetComponent<Slot>();
+                if(member = slot.slotMember)
+                {
+                    Debug.Log(" Member = " + member + " si j'ai bien compris ici on peut le destroy ? le slot GameObject est " + slot.gameObject + "le child est " +  child);
+                    Destroy(slot.gameObject);
+                }
+            }
+        }
+        
+        timeManager.OnTimeTravelTeam();
     }
 
     public void MemberDayCount()

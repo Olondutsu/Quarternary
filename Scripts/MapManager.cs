@@ -51,6 +51,7 @@ public class MapManager : MonoBehaviour
     {
         foreach(Member member in selectedBase.membersInBase)
         {
+
             if(member != null)
             {
                 Debug.Log("Member n'est pas nulll Populate Member selection");
@@ -157,6 +158,7 @@ public class MapManager : MonoBehaviour
         teamManager.OnTravel();
         displayJournal.travelButtons.SetActive(false);
         selectionPage.SetActive(false);
+        PopulateMemberSelection();
 
     }
     public void OnCancelTravel()
@@ -214,8 +216,6 @@ public class MapManager : MonoBehaviour
         {
             mapCase.DefineCasesAround();
         }
-
-        int childCount = 0;
 
        foreach(MapCase mapCase in mapCases)
         {
