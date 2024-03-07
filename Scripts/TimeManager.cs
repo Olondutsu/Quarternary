@@ -6,6 +6,7 @@ public class TimeManager : MonoBehaviour
     public int currentDay = 1;
     public TeamManager teamManager;
     public DisplayJournal displayJournal;
+    public EventGenerator eventGenerator;
     public int arrivalDayTime;
     public int returnDayTime;
     public bool travelChecked = false;
@@ -13,6 +14,7 @@ public class TimeManager : MonoBehaviour
     public void Start()
     {
         teamManager = FindObjectOfType<TeamManager>();
+        eventGenerator = FindObjectOfType<EventGenerator>();
         currentDay = 1;
     }
 
@@ -33,6 +35,7 @@ public class TimeManager : MonoBehaviour
 
         //teamManager.DisplayTeam();
         displayJournal.NewDay();
+        eventGenerator.ResetEvent();
         
         // Il faut que je fasse ça ailleurs
         // if(travelChecked)

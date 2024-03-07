@@ -67,9 +67,11 @@ public class TeamManager : MonoBehaviour
         aBase.membersInBase.Add(addMember);
 
         addMember.isInTeam = true;
+        GameObject goBase = aBase.gameObject;
 
         //DisplayTeam();
-        addMember.baseLivingIn = aBase;
+        addMember.baseLivingIn = goBase.GetComponent<Base>();
+
         mapManager.PopulateMemberSelection();
         RandomizeLeader();
         CheckPopulation(); 
@@ -509,7 +511,7 @@ public class TeamManager : MonoBehaviour
 
     public void UnthirstMember(Member member, int drinkRate)
     {
-        member.hunger += drinkRate;
+        member.thirst += drinkRate;
     }    
 
     public void HealMember(Member member)

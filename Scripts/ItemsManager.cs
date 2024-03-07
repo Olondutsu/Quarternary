@@ -13,13 +13,17 @@ public class ItemsManager : MonoBehaviour
     public Base selectedBase;
     public TeamManager teamManager;
 
-    public void AddItem(Base aBase, ItemData addItem)
-    {
-        aBase.itemsInBase.Add(addItem);
+    public void AddItem(Base aBase, ItemData addItem, int amount)
+    { 
+        for(int i = 1; i < amount; i++)
+        {
+            aBase.itemsInBase.Add(addItem);
+        }
+        
         ItemCount();
     }
 
-    public void RemoveItem(Base aBase, ItemData rmvItem)
+    public void RemoveItem(Base aBase, ItemData rmvItem, int amount)
     {
         aBase.itemsInBase.Remove(rmvItem);
         ItemCount();
@@ -62,7 +66,6 @@ public class ItemsManager : MonoBehaviour
             teamManager.FeedMember(teamMember, teamManager.feedRate);
             selectedBase.itemsInBase.Remove(usedItem);
             ItemCount();
-
         }
 
         if(usedItem.isDrink)

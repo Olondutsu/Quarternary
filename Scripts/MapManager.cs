@@ -102,18 +102,20 @@ public class MapManager : MonoBehaviour
 
     public void PopulateCasesMember()
     {
-        for (int i = 0; i < selectedBase.membersInBase.Count; i++)
+        foreach(Member aMember in teamManager.everyMembers)
         {
             int randomIndex = Random.Range(0, mapCases.Count);
             MapCase randomCase = mapCases[randomIndex];
 
             if(randomCase.isFree)
             {
-                Member member = teamManager.everyMembers[i];
-                randomCase.member = member;
+                randomCase.member = aMember;
                 randomCase.isFree = false;
-
+                randomCase.memberOccupied = true;
                 randomCase.notification.SetActive(true);
+            }
+            else
+            {
             }
         }
     }
@@ -165,6 +167,7 @@ public class MapManager : MonoBehaviour
     {
         displayJournal.travelButtons.SetActive(false);
         selectionPage.SetActive(false);
+        
     }
     public void OnClickTravel()
     {
@@ -220,7 +223,7 @@ public class MapManager : MonoBehaviour
        foreach(MapCase mapCase in mapCases)
         {
             float randomValue = Random.value;
-
+            mapCase.isFree = true;
             float treeWeight = 0.1f;
             float mountainWeight = 0.05f;
             float grassWeight = 1f - treeWeight - mountainWeight;
@@ -249,5 +252,6 @@ public class MapManager : MonoBehaviour
                 mapCase.image.sprite = grassCaseSprite;
             }
         }
+        PopulateCasesMember();
     }
 }

@@ -6,6 +6,7 @@ using Unity.VisualScripting;
 using UnityEditor.Animations;
 using System.Collections.Generic;
 using UnityEditor;
+using JetBrains.Annotations;
 
 public class DisplayJournal : MonoBehaviour
 {
@@ -17,6 +18,7 @@ public class DisplayJournal : MonoBehaviour
 
     public GameObject journal;
     private Event rnEvent;
+    public Event nextEvent;
 
     public ItemData foodItemData;
     public ItemData drinkItemData;
@@ -58,9 +60,7 @@ public class DisplayJournal : MonoBehaviour
 
     void Start()
     {
-        
         timeManager.NextDay();
-
     }
 
     public void ConfirmTravelClick()
@@ -299,11 +299,11 @@ public class DisplayJournal : MonoBehaviour
     public void NewDay()
     {
         Animation anim = transitionPanel.GetComponent<Animation>();
+        transitionPanel.SetActive(true);
         Debug.Log("NewDayCalled");
         eventGenerator.RandomizeEvent();
         index = 0;
         eventIndex = 0;
-        transitionPanel.SetActive(true);
         transiDayText.text = "Days : " + timeManager.currentDay;
         anim.Play("transition");
         ResetJournal();
@@ -602,33 +602,10 @@ public class DisplayJournal : MonoBehaviour
 
                     if(goPageNext.isEventPage)
                     {
-                        if(rnEvent.boolChoice)
-                        {
-                            if(rnEvent.yesChoice)
-                            {
-                                Debug.Log("POPULATE EVENT rnEvent.yeschoice");
-                                int aBool = UnityEngine.Random.Range(0, rnEvent.yesOutcomeEvents.Length);
-                                Event imDisEvent = rnEvent.yesOutcomeEvents[aBool];
-                                goPageNext.pageBody.text = imDisEvent.description;
-                            }
-                            if(rnEvent.noChoice)
-                            {
-                                Debug.Log("POPULATE EVENT rnEvent.nochoice");
-                                int aBool = UnityEngine.Random.Range(0, rnEvent.yesOutcomeEvents.Length);
-                                Event imDisEvent = rnEvent.noOutcomeEvents[aBool];
-                                goPageNext.pageBody.text = imDisEvent.description;
-                            }
-                        }
-                        else
-                        {
-                                Debug.Log("POPULATE EVENT rnEvent. notbool");
-                                int aBool = UnityEngine.Random.Range(0, rnEvent.yesOutcomeEvents.Length);
-                                Event imDisEvent = rnEvent.outcomeEvents[aBool];
-                                goPageNext.pageBody.text = imDisEvent.description;
-                        }
+                        eventGenerator.GetNextPage(goPageNext);
+                        ImmediateNextEventPage(goPageNext, rnEvent);
                     }
                 }
-
                 if(go == selectedBase.pagePrefab[0])
                 {
                     Debug.Log("POPULATE EVENT go == selectedBase.pagePrefab[0]");
@@ -672,6 +649,45 @@ public class DisplayJournal : MonoBehaviour
         }
         selectedBase.journalLoaded = true;
     }
+    
+    public void NextPageEvent()
+    {
+    }
+    public void ImmediateNextEventPage(Page aPage, Event anEvent)
+    {
+        int indexCheck = index + 1 ;
+        // GameObject goNext = selectedBase.pagePrefab[indexCheck];
+        // Page goPageNext = goNext.GetComponent<Page>(); 
+        
+        if(anEvent.boolChoice)
+        {
+            if(anEvent.yesChoice)
+            {
+                Debug.Log("POPULATE EVENT rnEvent.yeschoice");
+                int aBool = UnityEngine.Random.Range(0, anEvent.yesOutcomeEvents.Length);
+                Event imDisEvent = anEvent.yesOutcomeEvents[aBool];
+                aPage.pageBody.text = imDisEvent.description;
+                nextEvent = imDisEvent;
+            }
+            if(anEvent.noChoice)
+            {
+                Debug.Log("POPULATE EVENT rnEvent.nochoice");
+                int aBool = UnityEngine.Random.Range(0, anEvent.noOutcomeEvents.Length);
+                Event imDisEvent = anEvent.noOutcomeEvents[aBool];
+                aPage.pageBody.text = imDisEvent.description; 
+                nextEvent = imDisEvent;
+            }
+        }
+        else
+        {
+                Debug.Log("POPULATE EVENT rnEvent. notbool");
+                int aBool = UnityEngine.Random.Range(0, anEvent.outcomeEvents.Length);
+                Event imDisEvent = anEvent.outcomeEvents[aBool];
+                aPage.pageBody.text = imDisEvent.description;
+                nextEvent = imDisEvent;
+        }
+    }
+
     public void ApplyActions()
     {
         foreach(Slot slot in slotList)

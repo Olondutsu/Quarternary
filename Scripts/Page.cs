@@ -11,11 +11,12 @@ public class Page: MonoBehaviour
     public GameObject noButton;
     public GameObject nextButton;
     public GameObject parentGameObject;
-
+    Page nextPage;
     public Base selectedBase;
     public Text pageHead;
     public Text pageBody;
 
+    public Page instance;
     public bool isMapPage;
     public bool isEventPage;
     public bool isNeedsPage;
@@ -23,6 +24,7 @@ public class Page: MonoBehaviour
 
     void Start()
     {
+        instance = this;
     }
 
     public void CheckButtons()
@@ -57,19 +59,34 @@ public class Page: MonoBehaviour
     {
         eventGenerator.currentEvent.yesChoice = true;
         eventGenerator.EventEnabler();
+        eventGenerator.EventItemHandler(displayJournal.nextEvent);
+        // displayJournal.ImmediateNextEventPage(this, eventGenerator.currentEvent);
+        CheckButtons();
+        OnNextClick();
 
     }
     public void OnNoClick()
     {
          eventGenerator.currentEvent.noChoice = true;
          eventGenerator.EventEnabler();
+         eventGenerator.EventItemHandler(displayJournal.nextEvent);
+        //  displayJournal.ImmediateNextEventPage(this, eventGenerator.currentEvent);
+         CheckButtons();
+         OnNextClick();
     }
     public void OnNextClick()
     {
+        if(eventGenerator.currentEvent.hasImDis)
+        {
+            eventGenerator.EventItemHandler(displayJournal.nextEvent);
+        }
+        else
+        {
+            eventGenerator.EventItemHandler(eventGenerator.currentEvent);
+        }
         displayJournal.pastIndex = displayJournal.journalIndex;
+        
         displayJournal.OnNextPage();
-
-
     }
 }
 

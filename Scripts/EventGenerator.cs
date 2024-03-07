@@ -13,26 +13,47 @@ public class EventGenerator : MonoBehaviour
     public Event pastEvent;
     public Base thisBase;
     public Base selectedBase;
-
+    Page nextPage;
     public Slot slot;
     private ItemsManager itemManager;
     private TeamManager teamManager;
     private DisplayJournal displayJournal;
 
-    List<Event> availableEvents = new List<Event>();
-    List<Event> doneEvents = new List<Event>();
+    public List <Event> anyEvents = new List<Event>();
+    public List <Event> availableEvents = new List<Event>();
+    public List<Event> doneEvents = new List<Event>();
+    public List <Event> resetEvents = new List<Event>();
 
     void Start()
     {
         EventChecker();
+        ResetEvent();
 
         displayJournal = transform.GetComponent<DisplayJournal>();
         itemManager = transform.GetComponent<ItemsManager>();
         teamManager = transform.GetComponent<TeamManager>();
     }
 
+    public void ResetEvent()
+    {
+        foreach(Event ev in anyEvents)
+        {
+            if(ev.completed && ev.restartable)
+            {
+                resetEvents.Add(ev);
+            }
+        }
+        foreach(Event ev in resetEvents)
+        {
+                ev.completed = false;
+                ev.yesChoice = false;
+                ev.noChoice = false;
+        }
+    }
     public void EventChecker()
     {
+
+
         foreach (Event ev in events)
         {
             if (ev.conditionsMet)
@@ -46,7 +67,7 @@ public class EventGenerator : MonoBehaviour
         }
     }
 
-     public void RandomizeEvent()
+    public void RandomizeEvent()
     {
         // if(thisBase != null)
         // {
@@ -77,8 +98,15 @@ public class EventGenerator : MonoBehaviour
             }
     }
 
+    public void GetNextPage(Page aPage)
+    {
+        nextPage = aPage;
+    }
+
     public void EventEnabler()
     {
+        displayJournal.ImmediateNextEventPage(nextPage, currentEvent);
+
         // a appeler via un autre script où l'on clique oui ou non en précisant eventGenerator.currentEvent.yesChoice = true; ou  eventGenerator.currentEvent.noChoice = true;
         if(currentEvent.boolChoice)
         {
@@ -87,7 +115,9 @@ public class EventGenerator : MonoBehaviour
                 foreach(Event anEvent in currentEvent.yesOutcomeEvents)
                 {
                     anEvent.conditionsMet = true;
+                    
                 }
+
             }
 
             if(currentEvent.completed && currentEvent.noChoice)
@@ -96,10 +126,21 @@ public class EventGenerator : MonoBehaviour
                 {
                     anEvent.conditionsMet = true;
                 }
+
             }
         }
 
-        if(currentEvent.successOutcome != null)
+        int successCount = 0;
+
+        foreach(Event succEvent in currentEvent.successOutcome)
+        {
+            successCount++;
+        }
+
+        if(successCount >= 1)
+        {
+        }
+        else
         {
             if(CheckFirePower(currentEvent))
             {
@@ -122,7 +163,7 @@ public class EventGenerator : MonoBehaviour
         int firePowerGlobal = 0;
         int firePowerEnnemy = anEvent.firePower;
 
-        foreach(Member member in selectedBase.membersInBase)
+        foreach(Member member in thisBase.membersInBase)
         {
             firePowerGlobal += member.firePower;
         }
@@ -144,19 +185,22 @@ public class EventGenerator : MonoBehaviour
         }
     }
 
-    public void EventItemHandler()
+    public void EventItemHandler(Event anEvent)
     {
-        foreach(ItemData rewards in currentEvent.reward)
+        int amount = 1;
+        
+        foreach(ItemData reward in anEvent.reward)
         {
-            itemManager.AddItem(thisBase, rewards);
+            amount = Random.Range(0, 5);
+            itemManager.AddItem(thisBase, reward, amount);
         }
 
-        foreach(ItemData loss in currentEvent.loss)
+        foreach(ItemData loss in anEvent.loss)
         {
-             itemManager.AddItem(thisBase, loss);
+             itemManager.AddItem(thisBase, loss, amount);
         }
 
-        foreach(ItemData neededItems in currentEvent.neededItems)
+        foreach(ItemData neededItems in anEvent.neededItems)
         {
             foreach(ItemData ownedItems in thisBase.itemsInBase)
             {

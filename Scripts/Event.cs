@@ -14,7 +14,7 @@ public class Event : ScriptableObject
     public bool conditionsMet;
     public bool completed;
     public bool hasImDis;
-    public bool imDis;
+    public bool restartable;
     public bool isEnd;
     public int delayDays;
     public int firePower;
