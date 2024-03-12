@@ -18,20 +18,25 @@ public class TeamManager : MonoBehaviour
     public List<Member> travelingMembers = new List<Member>();
     public List<Member> everyMembers = new List<Member>();
     public List<Member> squadLeaders = new List<Member>();
+    public Transform[] visualPositions; 
     public Base selectedBase;
     public MapManager mapManager;
     public TimeManager timeManager;
     public ItemsManager itemsManager;
     public DisplayJournal displayJournal;
     public EventGenerator eventGenerator;
+    public GameManager gameManager;
     public GameObject parentDisplayBases;
     public GameObject basePrefab;
     public GameObject parentPickUp;
+    public GameObject visualPrefab;
     public GameObject pickUpPrefab;
+    public List<GameObject> membersVisual = new List<GameObject>();
 
     void Start()
     {
         itemsManager = FindObjectOfType<ItemsManager>();
+        gameManager = FindObjectOfType<GameManager>();
         OnBegin();
         InitializeMembersStats();
     }
@@ -49,30 +54,31 @@ public class TeamManager : MonoBehaviour
     // BASIC LIST MANIPULATION
     public void AddMember(Base aBase, Member addMember)
     {
-        Debug.Log("AddMember appelé");
+        Debug.Log("AddMember appelé pour " + addMember + "dans la Base " + aBase);
         
         if(aBase == null)
         {
-            Debug.Log("aBase est bien null, dans AddMember");
+            Debug.Log("aBase est null, dans AddMember");
 
             GameObject go;
             go = Instantiate(basePrefab, (parentDisplayBases.transform)) as GameObject;
             go.transform.SetParent(parentDisplayBases.transform);
             Base newBase = go.GetComponent<Base>();
-            
-
             CreateNewBase(newBase);
+            aBase = newBase;
         }
-
+        
         aBase.membersInBase.Add(addMember);
 
         addMember.isInTeam = true;
         GameObject goBase = aBase.gameObject;
 
         //DisplayTeam();
-        addMember.baseLivingIn = goBase.GetComponent<Base>();
+        addMember.baseLivingIn = aBase;
 
-        mapManager.PopulateMemberSelection();
+        mapManager.PopulateMemberSelection(addMember);
+        DisplayTeam(addMember);
+        
         RandomizeLeader();
         CheckPopulation(); 
     }
@@ -80,9 +86,26 @@ public class TeamManager : MonoBehaviour
     public void RemoveMember(Base aBase, Member rmvMember)
     {
         Debug.Log("RemoveMemberappelé");
-        aBase.membersInBase.Remove(rmvMember);
+       
         rmvMember.isInTeam = false;
-        //DisplayTeam();
+
+        // Delete gone member visual
+        for(int i = 0 ; i < membersVisual.Count; i++)
+        {
+            if(membersVisual.Count > 0)
+            {
+                GameObject goVisual = membersVisual[i];
+                MemberRef visualMR = goVisual.GetComponent<MemberRef>();
+
+                if(visualMR.member == rmvMember)
+                {
+                    visualMR.enabled = false;
+                    membersVisual.Remove(goVisual);
+                    Destroy(goVisual);
+                }
+            }
+        }
+        aBase.membersInBase.Remove(rmvMember);
         CheckPopulation(); 
     }
 
@@ -129,6 +152,7 @@ public class TeamManager : MonoBehaviour
                     displayJournal.selectedBase = aBase;
                     eventGenerator.thisBase = aBase;
                     itemsManager.selectedBase = aBase;
+                    timeManager.selectedBase = aBase;
                     
                     // CreateNewBase(aBase);
 
@@ -168,44 +192,58 @@ public class TeamManager : MonoBehaviour
 
     public void OnBegin()
     {
+        foreach(Member member in everyMembers)
+        {
+            member.isInTeam = false;
+            member.selected = false;
+        }
         // A revoir toute cette phase, il afut qu'on trouve le component Base de notre truc
         Base newBase = new Base();
         
         GameObject go;
         go = Instantiate(basePrefab, (parentDisplayBases.transform)) as GameObject;
         go.transform.SetParent(parentDisplayBases.transform);
-        newBase = go.GetComponent<Base>();
+        // ici problem ?
+        Transform go2 = go.transform.GetChild(0);
+
+        newBase = go2.GetComponent<Base>();
         bases.Add(newBase);
-        Debug.Log("OnBeginESt fait ça appelle jsute 2 methode mtn");
+        Debug.Log("OnBegin est fait ça appelle jsute 2 methode mtn");
         
         foreach(Transform child in parentDisplayBases.transform)
         {
-            Debug.Log("Pour chaque enfant "+ child + "de" + parentDisplayBases.transform);
-
-            Base aBase = child.GetComponent<Base>();
-            Slot slot = child.GetComponent<Slot>();
-
-            if(aBase != null)
+            // a transformer par 
+            // Transform child 2 = child.transform.GetChild(0);
+            foreach(Transform child2 in child.transform)
             {
-                Debug.Log("aBase est different de nul OnBegin");
+                Debug.Log("Pour chaque enfant "+ child2 + "de" + child.transform);
 
-                slot.slotBase = aBase;
-                selectedBase = aBase;
-                displayJournal.selectedBase = aBase;
-                eventGenerator.thisBase = aBase;
-                itemsManager.selectedBase = aBase;
-                
-                // CreateNewBase(aBase);
+                Base aBase = child2.GetComponent<Base>();
+                Slot slot = child2.GetComponent<Slot>();
 
-            }
-            else if (aBase.membersInBase.Count == 0)
-            {
-                Destroy(aBase.gameObject);
-                Debug.Log("On destroy une aBase dans le gameobject car le membersInBase == 0");
-            }
-            if (child == null)
-            {
-                Debug.Log("Child est null dans OnBegin la boucle");
+                if(aBase != null)
+                {
+                    Debug.Log("aBase est different de nul OnBegin");
+
+                    slot.slotBase = aBase;
+                    selectedBase = aBase;
+                    displayJournal.selectedBase = aBase;
+                    eventGenerator.thisBase = aBase;
+                    itemsManager.selectedBase = aBase;
+                    timeManager.selectedBase = aBase;
+                    
+                    // CreateNewBase(aBase);
+
+                }
+                else if (aBase.membersInBase.Count == 0)
+                {
+                    Destroy(aBase.gameObject);
+                    Debug.Log("On destroy une aBase dans le gameobject car le membersInBase == 0");
+                }
+                if (child == null)
+                {
+                    Debug.Log("Child est null dans OnBegin la boucle");
+                }
             }
         }
 
@@ -308,14 +346,111 @@ public class TeamManager : MonoBehaviour
         }
     }
 
-    // // DISPLAY & UPDATE VISUALS
-    public void DisplayTeam()
+    // // // DISPLAY & UPDATE VISUALS
+    // public void DisplayTeam(Member addMember)
+    // {
+    //     for (int i = 0; i < selectedBase.membersInBase.Count; i++)
+    //     {
+    //         Member member = selectedBase.membersInBase[i];
+    //         foreach(GameObject aVisual in membersVisual)
+    //         {
+    //             MemberRef aVisualMR = aVisual.GetComponent<MemberRef>();
+    //             if(aVisualMR.member == addMember)
+    //             {
+
+    //             }
+    //             else
+    //             {
+
+    //             }
+    //         }
+    //         if(!member.visible)
+    //         {
+    //             GameObject visual = Instantiate(visualPrefab, visualPositions[i].position, Quaternion.identity);
+    //             MemberRef visualMR = visual.GetComponent<MemberRef>();
+
+    //             visual.transform.parent = visualPositions[i];
+    //             visualMR.member = addMember;
+    //             member.visible = true;
+    //             membersVisual.Add(visual);
+                
+    //             Debug.Log("Ajout du visuel du member" + addMember + visual);
+
+    //             SpriteRenderer aSprite = visual.GetComponent<SpriteRenderer>();
+
+    //             if (i == 0)
+    //             {
+    //                 aSprite.sprite = addMember.gameVisual;
+    //             }
+    //             if(i == 1 || i == 2)
+    //             {
+    //                 aSprite.sprite = addMember.gameVisual2;
+    //             }
+    //             if (i == 3)
+    //             {
+    //                 aSprite.sprite = addMember.gameVisual;
+    //             }
+
+    //             if (i >= 2)
+    //             {
+    //                 visual.transform.Rotate(0f, 180f, 0f);
+    //             }
+    //         }
+    //     }
+    // }
+    
+    public void DisplayTeam(Member addMember)
     {
-        foreach (Member member in selectedBase.membersInBase)
+        int index = 0;
+
+        for (int i = 0; i < selectedBase.membersInBase.Count; i++)
         {
-            // member.gameVisual.SetActive(true);
-            // OnSelectionClick(member);
+            
+            Debug.Log(" i = " + i + "membersCount "  + selectedBase.membersInBase.Count + "index " + index );
+            if(selectedBase.membersInBase[i] == addMember)
+            {
+                Debug.Log("if(selectedBase.membersInBase[i] = addMember)" + addMember);
+                index = i;
+                break;
+            }
+            else
+            {
+                Debug.Log("Else du index");
+                index++;
+            }
         }
+        Debug.Log("index en sortie " + index);
+        Member member = selectedBase.membersInBase[index];
+        Debug.Log("membre en sortie " + member);
+        GameObject visual = Instantiate(visualPrefab, visualPositions[index].position, Quaternion.identity);
+        MemberRef visualMR = visual.GetComponent<MemberRef>();
+
+        visual.transform.parent = visualPositions[index];
+        visualMR.member = member;
+        member.visible = true;
+        membersVisual.Add(visual);
+        
+        Debug.Log("Ajout du visuel du member" + addMember + visual);
+
+        SpriteRenderer aSprite = visual.GetComponent<SpriteRenderer>();
+
+        if (index == 0)
+        {
+            aSprite.sprite = addMember.gameVisual;
+        }
+        if(index == 1 || index == 2)
+        {
+            aSprite.sprite = addMember.gameVisual2;
+        }
+        if (index == 3)
+        {
+            aSprite.sprite = addMember.gameVisual;
+        }
+        if (index >= 2)
+        {
+            visual.transform.Rotate(0f, 180f, 0f);
+        }
+                       
     }
 
     public void RandomizeLeader()
@@ -335,9 +470,12 @@ public class TeamManager : MonoBehaviour
 
                     foreach(Transform child in parentDisplayBases.transform)
                     {
-                        Slot slot = child.GetComponent<Slot>();
-                        
-                        slot.image.sprite = aBase.squadLeader.journalVisual;
+                        foreach(Transform child2 in child.transform)
+                        {
+                            Slot slot = child2.GetComponent<Slot>();
+                            
+                            slot.image.sprite = aBase.squadLeader.journalVisual;
+                        }
 
                     }
                 }
@@ -349,6 +487,110 @@ public class TeamManager : MonoBehaviour
             }
         }
     }
+
+    // public void DisplayBases()
+    // {
+    //     int xOffset = 0;
+
+    //     foreach(Base aBase in bases)
+    //     {
+    //         if(aBase != null)
+    //         {
+    //             Debug.Log("ABas.membersInBase n'est pas null");
+
+    //             if(!aBase.displayed)
+    //             {
+    //                 Debug.Log("ABase n'est pas displayed dans displayBase");
+    //                 GameObject go;
+    //                 xOffset += 3;
+
+    //                 go = Instantiate(basePrefab, (parentDisplayBases.transform)) as GameObject;
+
+    //                 go.transform.SetParent(parentDisplayBases.transform);
+                    
+    //                 aBase.displayed = true;
+
+    //                 foreach(Transform child in parentDisplayBases.transform)
+    //                 {
+
+    //                     // foreach(Transform child2 in child.transform)
+    //                     // {
+    //                     // }
+    //                     Slot teamSlot = child.GetComponent<Slot>();
+    //                     Base teamBase = child.GetComponent<Base>();
+                        
+    //                     if(teamBase != null && teamBase.displayed)
+    //                     {
+    //                         selectedBase = teamBase;
+                        
+    //                         if (teamBase.membersInBase.Count > 0 && teamBase.displayed)
+    //                         {
+
+    //                         }
+    //                         else
+    //                         {
+    //                             Destroy(child);
+    //                             bases.Remove(teamBase);
+    //                         }
+    //                     }
+    //                     else
+    //                     {
+    //                         teamSlot.image.enabled = false;
+    //                         teamSlot.enabled = false;
+    //                         teamBase.enabled = false;
+    //                         Destroy(child);
+    //                         bases.Remove(teamBase);
+    //                     }
+
+    //                     if(teamSlot != null)
+    //                     {
+    //                         teamSlots.Add(teamSlot);
+
+    //                         if(aBase.squadLeader != null)
+    //                         {
+    //                             foreach(Slot teamSlot2 in teamSlots)
+    //                             {
+    //                                 teamSlot2.slotBase = aBase;
+    //                                 teamSlot2.image.sprite = aBase.squadLeader.journalVisual;
+    //                                 aBase.available = true;
+    //                             }
+    //                         }
+    //                     }
+    //                     if(teamBase.membersInBase != null && teamBase.displayed)
+    //                     {
+                            
+    //                     }
+    //                     else
+    //                     {
+
+    //                     }
+    //                 }
+    //             }
+    //             else
+    //             {
+    //             }
+    //         }
+    //         else
+    //         {
+    //             GameObject go;
+    //             xOffset += 3;
+
+    //             go = Instantiate(basePrefab, (parentDisplayBases.transform)) as GameObject;
+    //             go.transform.SetParent(parentDisplayBases.transform);
+
+    //             foreach(Transform child in parentDisplayBases.transform)
+    //             {
+    //                 Base teamBase = child.GetComponent<Base>();
+
+    //                 bases.Add(teamBase);
+    //                 break;
+    //             }
+    //             break;
+    //             // bases.Remove(aBase);
+    //             // CheckPopulation();
+    //         }
+    //     }
+    // }
 
     public void DisplayBases()
     {
@@ -375,53 +617,58 @@ public class TeamManager : MonoBehaviour
                     foreach(Transform child in parentDisplayBases.transform)
                     {
 
-                        Slot teamSlot = child.GetComponent<Slot>();
-                        Base teamBase = child.GetComponent<Base>();
-                        
-                        if(teamBase != null && teamBase.displayed)
+                        foreach(Transform child2 in child.transform)
                         {
-                            selectedBase = teamBase;
                         
-                            if (teamBase.membersInBase.Count > 0 && teamBase.displayed)
+                            Slot teamSlot = child2.GetComponent<Slot>();
+                            Base teamBase = child2.GetComponent<Base>();
+                            
+                            if(teamBase != null && teamBase.displayed)
                             {
+                                selectedBase = teamBase;
+                            
+                                if (teamBase.membersInBase.Count > 0 && teamBase.displayed)
+                                {
 
+                                }
+                                else
+                                {
+                                    Destroy(child);
+                                    // Destroy(child2);
+                                    bases.Remove(teamBase);
+                                }
                             }
                             else
                             {
+                                teamSlot.image.enabled = false;
+                                teamSlot.enabled = false;
+                                teamBase.enabled = false;
                                 Destroy(child);
                                 bases.Remove(teamBase);
                             }
-                        }
-                        else
-                        {
-                            teamSlot.image.enabled = false;
-                            teamSlot.enabled = false;
-                            teamBase.enabled = false;
-                            Destroy(child);
-                            bases.Remove(teamBase);
-                        }
 
-                        if(teamSlot != null)
-                        {
-                            teamSlots.Add(teamSlot);
-
-                            if(aBase.squadLeader != null)
+                            if(teamSlot != null)
                             {
-                                foreach(Slot teamSlot2 in teamSlots)
+                                teamSlots.Add(teamSlot);
+
+                                if(aBase.squadLeader != null)
                                 {
-                                    teamSlot2.slotBase = aBase;
-                                    teamSlot2.image.sprite = aBase.squadLeader.journalVisual;
-                                    aBase.available = true;
+                                    foreach(Slot teamSlot2 in teamSlots)
+                                    {
+                                        teamSlot2.slotBase = aBase;
+                                        teamSlot2.image.sprite = aBase.squadLeader.journalVisual;
+                                        aBase.available = true;
+                                    }
                                 }
                             }
-                        }
-                        if(teamBase.membersInBase != null && teamBase.displayed)
-                        {
-                            
-                        }
-                        else
-                        {
+                            if(teamBase.membersInBase != null && teamBase.displayed)
+                            {
+                                
+                            }
+                            else
+                            {
 
+                            }
                         }
                     }
                 }
@@ -476,16 +723,29 @@ public class TeamManager : MonoBehaviour
 
     public void LifeCheck()
     {
+        int memberCount = 0;
+        
         foreach (Base aBase in bases)
         {
-            foreach (Member member in aBase.membersInBase)
+            for(int i = 0; i < aBase.membersInBase.Count ; i++)
             {
+                Member member = aBase.membersInBase[i];
+
+                memberCount++;
                 if(member.hunger == 0|| member.thirst == 0 || member.physicalHealth == 0 || member.mentalHealth == 0)
                 {
                     aBase.membersInBase.Remove(member);
                     Debug.Log(member + " died");
                 }
             }
+            foreach(Member member in aBase.membersInTravel)
+            {
+                memberCount++;
+            }
+        }
+        if(memberCount == 0)
+        {
+            gameManager.GameOver();
         }
     }
     
@@ -523,11 +783,19 @@ public class TeamManager : MonoBehaviour
     // SELECTION
     public void OnSelectionClick(Member selected)
     {
+        bool alreadySelected = false;
+        foreach(Member member in selectedMembers)
+        {
+            if(selected = member)
+            {
+                alreadySelected = true;
+            }
+        }
         Debug.Log("OnSelectionClick du teamManager" + selected);
 
         selected.selected = !selected.selected;
 
-        if(selected.selected)
+        if(selected.selected && !alreadySelected)
         {
             Debug.Log("selected selected" + selected);
             SelectMembers(selected);
@@ -537,6 +805,14 @@ public class TeamManager : MonoBehaviour
 
     public void SelectMembers(Member selected)
     {
+        foreach(Member member in selectedMembers)
+        {
+            if(selected = member)
+            {
+                Debug.Log(member + "Déjà selectionner");
+                member.selected = false;
+            }
+        }
         if(selected.selected)
         {
             // Base aBase = selected.BaseLivingIn;
@@ -566,9 +842,7 @@ public class TeamManager : MonoBehaviour
             selectedMember.baseComingFrom = aBase;
             timeManager.travelChecked = true;
             MemberDayCount();
-            mapManager.PopulateMemberSelection();
-            
-            // selectedMembers.Remove(selectedMember);
+            //selectedMembers.Remove(selectedMember);
         }
         for (int i = 0; i < selectedMembers.Count; i++)
         {

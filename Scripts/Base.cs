@@ -15,6 +15,7 @@ public class Base : MonoBehaviour
     public List<GameObject> pagePrefab = new List<GameObject>();
 
     public Member squadLeader;
+    public MapCase clickedCase;
     public bool journalLoaded;
     public bool isSelected;
     public bool available;

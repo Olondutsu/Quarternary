@@ -43,13 +43,18 @@ public class EventGenerator : MonoBehaviour
                 resetEvents.Add(ev);
             }
         }
-        foreach(Event ev in resetEvents)
+
+        if(resetEvents.Count > 0)
         {
-                ev.completed = false;
-                ev.yesChoice = false;
-                ev.noChoice = false;
+            foreach(Event ev in resetEvents)
+            {
+                    ev.completed = false;
+                    ev.yesChoice = false;
+                    ev.noChoice = false;
+            }
         }
     }
+
     public void EventChecker()
     {
 
@@ -215,6 +220,8 @@ public class EventGenerator : MonoBehaviour
                 }
             }
         }
+        
+        itemManager.DisplayItemsVisual();
     }
 
      public void MemberHandler()

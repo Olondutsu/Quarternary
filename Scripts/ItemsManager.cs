@@ -5,6 +5,12 @@ using UnityEngine;
 public class ItemsManager : MonoBehaviour
 {
 
+    public Transform[] foodVisualPositions;
+    public Transform[] drinkVisualPositions;
+    public GameObject foodVisualPrefab;
+    public GameObject drinkVisualPrefab;
+    public GameObject healKitVisual;
+
     public int healKit;
     public int food;
     public int drink;
@@ -31,10 +37,65 @@ public class ItemsManager : MonoBehaviour
 
     public void DisplayItemsVisual()
     {
+        int foodCount = 0;
+        int drinkCount = 0;
+        int rifleCount = 0;
+        int foodTransformCount = 0;
+        int drinkTransformCount = 0;
+        // Crer une genre de liste de transform avec tous les items existants, ajouter a tous un sprite
         foreach(ItemData item in selectedBase.itemsInBase)
         {
-            item.gameVisual.SetActive(true);
+            if(item.isFood)
+            {
+                foodCount++;
+            }
+            if(item.isDrink)
+            {
+                drinkCount++;
+            }
+            if(item.isHealKit)
+            {
+                healKitVisual.SetActive(true);
+            }
+            if(item.name == "Rifle")
+            {  
+                rifleCount++;
+            }
         }
+
+        foreach(Transform transform in foodVisualPositions)
+        {
+            foodTransformCount++;
+        }
+
+        foreach(Transform transform in drinkVisualPositions)
+        {
+            drinkTransformCount++;
+        }
+
+        if(foodCount > foodTransformCount)
+        {
+            foodCount = foodTransformCount;
+        }
+
+        if(drinkCount > drinkTransformCount)
+        {
+            drinkCount = drinkTransformCount;
+        }
+
+        for(int i = 0; i < foodCount; i++)
+        {
+            GameObject visual = Instantiate(foodVisualPrefab, foodVisualPositions[i].position, Quaternion.identity);
+            visual.transform.parent = foodVisualPositions[i];
+        }
+
+        for(int i = 0; i < drinkCount; i++)
+        {
+            GameObject visual = Instantiate(drinkVisualPrefab, drinkVisualPositions[i].position, Quaternion.identity);
+            visual.transform.parent = drinkVisualPositions[i];
+        }
+
+
     }
     
     public void ItemCount()

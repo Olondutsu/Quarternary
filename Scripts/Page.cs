@@ -24,6 +24,9 @@ public class Page: MonoBehaviour
 
     void Start()
     {
+        eventGenerator = FindObjectOfType<EventGenerator>();
+        displayJournal = FindObjectOfType<DisplayJournal>();
+        
         instance = this;
     }
 

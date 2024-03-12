@@ -703,15 +703,15 @@ public class DisplayJournal : MonoBehaviour
                 }
             }
         }
-        if(selectedBase.selectedMembers != null)
-        {
-            foreach(Member member in selectedBase.selectedMembers)
-            {
-                selectedBase.membersInBase.Remove(member);
-                selectedBase.membersInTravel.Add(member);
+        // if(selectedBase.selectedMembers != null)
+        // {
+        //     foreach(Member member in selectedBase.selectedMembers)
+        //     {
+        //         selectedBase.membersInBase.Remove(member);
+        //         selectedBase.membersInTravel.Add(member);
 
-            }
-        }
+        //     }
+        // }
         if(!eventGenerator.currentEvent.hasImDis)
         {
             eventGenerator.EventEnabler();

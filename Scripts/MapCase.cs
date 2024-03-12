@@ -13,6 +13,7 @@ public class MapCase: MonoBehaviour
     public Text eventName;
     public MapEvent[] mapEvent;
     public MapEvent thisCaseEvent;
+    public Base selectedBase;
     public List<MapEvent> mapEvents = new List<MapEvent>();
 
     public List<MapCase> neighbors = new List<MapCase>();
@@ -54,6 +55,7 @@ public class MapCase: MonoBehaviour
         itemManager = FindObjectOfType<ItemsManager>();
         displayJournal = FindObjectOfType<DisplayJournal>();
         image = transform.GetComponent<Image>();
+        selectedBase = teamManager.selectedBase;
 
     }
 
@@ -101,7 +103,11 @@ public class MapCase: MonoBehaviour
 
     public void OnCaseClick()
     {
+        mapManager.GetMapCase(XCoordinate, YCoordinate);
+        selectedBase.clickedCase = instance;
+
         mapManager.CalculateMapDistance(instance);
+        isClicked = true;
 
         if(instance.isBaseFrom)
         {

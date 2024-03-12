@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,7 +12,7 @@ public class MapManager : MonoBehaviour
     public GameObject mapUI;
     public GameObject memberParent;
     public GameObject memberPrefab;
-    
+    public Page mapEventPage;
     public MapCase mapCase;
     public MapCase playerCase;
     public TeamManager teamManager;
@@ -37,7 +38,7 @@ public class MapManager : MonoBehaviour
     public int onTravel;
     public bool mapDisplayed = false;
     public bool mapUIActive = false;
-    
+    public bool casesMemberGenerated = false;
     public void Start()
     {
         displayJournal = FindObjectOfType<DisplayJournal>();
@@ -47,35 +48,33 @@ public class MapManager : MonoBehaviour
         
     }
 
-    public void PopulateMemberSelection()
+    public MapCase GetMapCase(int x, int y)
     {
-        foreach(Member member in selectedBase.membersInBase)
+        foreach (MapCase mapCase in mapCases)
         {
-
-            if(member != null)
+            if (mapCase.XCoordinate == x && mapCase.YCoordinate == y)
             {
-                Debug.Log("Member n'est pas nulll Populate Member selection");
-                GameObject go;
-
-                go = Instantiate(memberPrefab, memberParent.transform);
-                go.transform.SetParent(memberParent.transform);
-                
-                Slot slot = go.GetComponent<Slot>();
-                slot.slotMember = member;
-                slot.isCharacterSlot = true;
-                slot.image.sprite = member.journalVisual;
-                selectionSlots.Add(slot);
+                return mapCase;
             }
             else
-            {
-                Debug.Log("On détruit les child popualte member selection");
-                foreach(Transform child in memberParent.transform)
-                {
-                    Destroy(child.gameObject);
-                }
-            }
-
+            {Debug.Log("Pas de MapCase");}
         }
+        return null; // Si aucune case correspondante n'est trouvée
+    }
+
+    public void PopulateMemberSelection(Member addMember)
+    {
+        GameObject go;
+
+        go = Instantiate(memberPrefab, memberParent.transform);
+        go.transform.SetParent(memberParent.transform);
+        
+        Slot slot = go.GetComponent<Slot>();
+
+        slot.slotMember = addMember;
+        slot.isCharacterSlot = true;
+        slot.image.sprite = addMember.journalVisual;
+        selectionSlots.Add(slot);
     }
 
     public void RandomizeCasesEvent()
@@ -104,20 +103,25 @@ public class MapManager : MonoBehaviour
     {
         foreach(Member aMember in teamManager.everyMembers)
         {
-            int randomIndex = Random.Range(0, mapCases.Count);
-            MapCase randomCase = mapCases[randomIndex];
+            // grv a chier cette façon de faire javais juste la flemme et jveux du resultat vif sinon il faut évidmment créer une autre liste qu'EveryMembers
+            if(!aMember.isInTeam)
+            {
+                int randomIndex = Random.Range(0, mapCases.Count);
+                MapCase randomCase = mapCases[randomIndex];
 
-            if(randomCase.isFree)
-            {
-                randomCase.member = aMember;
-                randomCase.isFree = false;
-                randomCase.memberOccupied = true;
-                randomCase.notification.SetActive(true);
-            }
-            else
-            {
+                if(randomCase.isFree)
+                {
+                    randomCase.member = aMember;
+                    randomCase.isFree = false;
+                    randomCase.memberOccupied = true;
+                    randomCase.notification.SetActive(true);
+                }
+                else
+                {
+                }
             }
         }
+        casesMemberGenerated = true;
     }
 
     public void DefinePlayerCase()
@@ -135,6 +139,57 @@ public class MapManager : MonoBehaviour
         if(playerCase == null)
         {
             DefinePlayerCase();
+        }
+        if(!casesMemberGenerated)
+        {
+            PopulateCasesMember();
+        }
+    }
+
+    public void DefineTravelCase()
+    {
+    }
+
+    public void MapEventArrivalTrigger()
+    {
+        MapCase clickedCase = selectedBase.clickedCase;
+        GameObject mapEventPageGO = mapEventPage.gameObject;
+
+
+        if (clickedCase.memberOccupied)
+        {
+            Debug.Log("La Case est occupé par un membre");
+            
+            mapEventPage.pageBody.text = clickedCase.member.name + "is here and joined your team";
+            selectedBase.membersInTravel.Add(clickedCase.member);
+            mapEventPageGO.SetActive(true);
+        }
+        else
+        {
+            Debug.Log("La Case est pas occupé par un membre");
+        }
+        if (clickedCase.eventOccupied)
+        {
+            Debug.Log("La Case est occupé par un event");
+            mapEventPage.pageBody.text = clickedCase.thisCaseEvent.description;
+            mapEventPageGO.SetActive(true);
+        }
+        else
+        {
+            Debug.Log("La Case est pas occupé par un membre");
+        }
+    }
+
+    public void PopulateMapEventPage()
+    {
+
+    }
+
+    public void MapEventReturnTrigger()
+    {
+        foreach(Member member in selectedBase.membersInTravel)
+        {
+            selectedBase.membersInBase.Add(member);
         }
     }
 
@@ -160,8 +215,6 @@ public class MapManager : MonoBehaviour
         teamManager.OnTravel();
         displayJournal.travelButtons.SetActive(false);
         selectionPage.SetActive(false);
-        PopulateMemberSelection();
-
     }
     public void OnCancelTravel()
     {
@@ -252,6 +305,5 @@ public class MapManager : MonoBehaviour
                 mapCase.image.sprite = grassCaseSprite;
             }
         }
-        PopulateCasesMember();
     }
 }

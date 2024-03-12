@@ -7,8 +7,10 @@ public class Member : ScriptableObject
     public Sprite journalVisual;
     public Sprite journalVisualHighlight;
     public Sprite gameVisual;
+    public Sprite gameVisual2;
     public Base baseComingFrom;
     public Base baseLivingIn;
+    public Transform goVisual;
     public string fullname;
     public int physicalHealth;
     public int mentalHealth;
@@ -20,6 +22,7 @@ public class Member : ScriptableObject
     public bool selected;
     public bool arrived;
     public bool returned;
+    public bool visible;
     
     // public Member(string name, int physicalHealth, int mentalHealth, int hunger, int thirst)
     // {
