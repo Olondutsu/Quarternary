@@ -346,59 +346,7 @@ public class TeamManager : MonoBehaviour
         }
     }
 
-    // // // DISPLAY & UPDATE VISUALS
-    // public void DisplayTeam(Member addMember)
-    // {
-    //     for (int i = 0; i < selectedBase.membersInBase.Count; i++)
-    //     {
-    //         Member member = selectedBase.membersInBase[i];
-    //         foreach(GameObject aVisual in membersVisual)
-    //         {
-    //             MemberRef aVisualMR = aVisual.GetComponent<MemberRef>();
-    //             if(aVisualMR.member == addMember)
-    //             {
-
-    //             }
-    //             else
-    //             {
-
-    //             }
-    //         }
-    //         if(!member.visible)
-    //         {
-    //             GameObject visual = Instantiate(visualPrefab, visualPositions[i].position, Quaternion.identity);
-    //             MemberRef visualMR = visual.GetComponent<MemberRef>();
-
-    //             visual.transform.parent = visualPositions[i];
-    //             visualMR.member = addMember;
-    //             member.visible = true;
-    //             membersVisual.Add(visual);
-                
-    //             Debug.Log("Ajout du visuel du member" + addMember + visual);
-
-    //             SpriteRenderer aSprite = visual.GetComponent<SpriteRenderer>();
-
-    //             if (i == 0)
-    //             {
-    //                 aSprite.sprite = addMember.gameVisual;
-    //             }
-    //             if(i == 1 || i == 2)
-    //             {
-    //                 aSprite.sprite = addMember.gameVisual2;
-    //             }
-    //             if (i == 3)
-    //             {
-    //                 aSprite.sprite = addMember.gameVisual;
-    //             }
-
-    //             if (i >= 2)
-    //             {
-    //                 visual.transform.Rotate(0f, 180f, 0f);
-    //             }
-    //         }
-    //     }
-    // }
-    
+    // // // DISPLAY & UPDATE VISUALS    
     public void DisplayTeam(Member addMember)
     {
         int index = 0;
@@ -794,6 +742,13 @@ public class TeamManager : MonoBehaviour
         Debug.Log("OnSelectionClick du teamManager" + selected);
 
         selected.selected = !selected.selected;
+        foreach(Slot slot in mapManager.selectionSlots)
+        {
+            if(selected.selected && slot.slotMember == selected)
+            {
+                slot.image.sprite = selected.journalVisualHighlight;
+            }
+        }
 
         if(selected.selected && !alreadySelected)
         {

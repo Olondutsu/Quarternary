@@ -43,29 +43,10 @@ public class TimeManager : MonoBehaviour
         if(currentDay >1)
         {
             OverTimeTravelCheck();
-        }
-        //teamManager.DisplayTeam();
+        };
         displayJournal.NewDay();
         eventGenerator.ResetEvent();
         
-        // Il faut que je fasse ça ailleurs
-        // if(travelChecked)
-        // {
-            // OnTimeTravelTeam();
-        // }
-        // bool travelSkipDay;
-
-        // foreach(Base aBase in teamManager.bases)
-        // {
-        //     aBase.journalLoaded = false;
-        //     if(aBase.membersInBase.Count < 1)
-        //     {
-        //         travelSkipDay = true;
-        //     }
-        // }
-        // if(travelSkipDay)
-        // {
-        // }
     }
 
     public void SkipDays()
@@ -146,13 +127,14 @@ public class TimeManager : MonoBehaviour
     {
         if(currentDay == arrivalDayTime)
         {
+            mapManager.MapEventArrivalTrigger();
             Debug.Log("if(currentDay == arrivalDayTime)");
             foreach(Member member in selectedBase.membersInTravel)
             {
                 member.arrived = true;
             }
 
-            mapManager.MapEventArrivalTrigger();
+            
         }
         
         if(currentDay == returnDayTime)

@@ -154,16 +154,26 @@ public class MapManager : MonoBehaviour
     {
         MapCase clickedCase = selectedBase.clickedCase;
         GameObject mapEventPageGO = mapEventPage.gameObject;
-
-
+        
         if (clickedCase.memberOccupied)
         {
             Debug.Log("La Case est occupé par un membre");
-            
-            mapEventPage.pageBody.text = clickedCase.member.name + "is here and joined your team";
-            selectedBase.membersInTravel.Add(clickedCase.member);
+            if (!selectedBase.membersInTravel.Contains(clickedCase.member))
+            {
+                clickedCase.member.currentCase = selectedBase.clickedCase;
+                clickedCase.notification.SetActive(false);
+                selectedBase.membersInTravel.Add(clickedCase.member);
+                mapEventPage.pageBody.text = clickedCase.member.name + " est ici et a rejoint votre équipe";
+            }
+            else
+            {
+                Debug.Log(clickedCase.member.name + " est déjà dans membersInTravel");
+            }
+            // mapEventPage.pageBody.text = clickedCase.member.name + "is here and joined your team";
+            // selectedBase.membersInTravel.Add(clickedCase.member);
             mapEventPageGO.SetActive(true);
         }
+        
         else
         {
             Debug.Log("La Case est pas occupé par un membre");

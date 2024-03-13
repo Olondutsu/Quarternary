@@ -7,9 +7,14 @@ public class ItemsManager : MonoBehaviour
 
     public Transform[] foodVisualPositions;
     public Transform[] drinkVisualPositions;
+    public Transform[] rifleVisualPositions;
     public GameObject foodVisualPrefab;
     public GameObject drinkVisualPrefab;
+    public GameObject rifleVisualPrefab;
     public GameObject healKitVisual;
+    public GameObject axeVisual;
+    public GameObject shovelVisual;
+    public GameObject radioVisual;
 
     public int healKit;
     public int food;
@@ -25,6 +30,7 @@ public class ItemsManager : MonoBehaviour
         {
             aBase.itemsInBase.Add(addItem);
         }
+        // SWitch to Quantities for each items
         
         ItemCount();
     }
@@ -42,27 +48,50 @@ public class ItemsManager : MonoBehaviour
         int rifleCount = 0;
         int foodTransformCount = 0;
         int drinkTransformCount = 0;
+        int rifleTransformCount = 0;
         // Crer une genre de liste de transform avec tous les items existants, ajouter a tous un sprite
         foreach(ItemData item in selectedBase.itemsInBase)
         {
-            if(item.isFood)
+            if(!item.Displayed)
             {
-                foodCount++;
-            }
-            if(item.isDrink)
-            {
-                drinkCount++;
-            }
-            if(item.isHealKit)
-            {
-                healKitVisual.SetActive(true);
-            }
-            if(item.name == "Rifle")
-            {  
-                rifleCount++;
+                if(item.isFood)
+                {
+                    item.Displayed = true;
+                    foodCount++;
+                }
+                if(item.isDrink)
+                {
+                    item.Displayed = true;
+                    drinkCount++;
+                }
+                if(item.isHealKit)
+                {
+                    item.Displayed = true;
+                    healKitVisual.SetActive(true);
+                }
+                if(item.name == "Rifle")
+                {  
+                    item.Displayed = true;
+                    rifleCount++;
+                }
+                if(item.name == "Shovel")
+                {  
+                    item.Displayed = true;
+                    shovelVisual.SetActive(true);
+                }
+
+                if(item.name == "Axe")
+                {  
+                    item.Displayed = true;
+                    axeVisual.SetActive(true);
+                }
+                if(item.name == "Radio")
+                {  
+                    item.Displayed = true;
+                    radioVisual.SetActive(true);
+                }
             }
         }
-
         foreach(Transform transform in foodVisualPositions)
         {
             foodTransformCount++;
@@ -71,6 +100,16 @@ public class ItemsManager : MonoBehaviour
         foreach(Transform transform in drinkVisualPositions)
         {
             drinkTransformCount++;
+        }
+
+        foreach(Transform transform in rifleVisualPositions)
+        {
+            rifleTransformCount++;
+        }
+
+        if(rifleCount > rifleTransformCount)
+        {
+            rifleCount = rifleTransformCount;
         }
 
         if(foodCount > foodTransformCount)
@@ -94,7 +133,12 @@ public class ItemsManager : MonoBehaviour
             GameObject visual = Instantiate(drinkVisualPrefab, drinkVisualPositions[i].position, Quaternion.identity);
             visual.transform.parent = drinkVisualPositions[i];
         }
-
+        
+        for(int i = 0; i < rifleCount; i++)
+        {
+            GameObject visual = Instantiate(rifleVisualPrefab, rifleVisualPositions[i].position, Quaternion.identity);
+            visual.transform.parent = rifleVisualPositions[i];
+        }
 
     }
     

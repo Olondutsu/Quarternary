@@ -11,6 +11,7 @@ public class Member : ScriptableObject
     public Base baseComingFrom;
     public Base baseLivingIn;
     public Transform goVisual;
+    public MapCase currentCase;
     public string fullname;
     public int physicalHealth;
     public int mentalHealth;

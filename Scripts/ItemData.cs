@@ -10,13 +10,15 @@ public class ItemData : ScriptableObject
     [SerializeField]
     public GameObject gameVisual;
     
-     [SerializeField]
+    [SerializeField]
     public Sprite journalVisualAvailable;
-     [SerializeField]
+    [SerializeField]
     public Sprite journalVisualUnAvailable;
+    public int Quantity;
     public bool isSupplie;
     public bool isFood;
     public bool isDrink;
     public bool isHealKit;
     public bool selected;
+    public bool Displayed;
 }
