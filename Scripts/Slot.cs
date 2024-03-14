@@ -52,7 +52,17 @@ public class Slot: MonoBehaviour
         {
             if(slotMember != null)
             {
-                itemManager.OnUse(slotMember, slotItem);
+                Base.InventoryItem existingItem = teamManager.selectedBase.itemsInBase.Find(item => item.itemData == slotItem);
+
+                if(teamManager.selectedBase.itemsInBase.Contains(existingItem))
+                {
+                    itemManager.OnUse(slotMember, slotItem);
+                }
+                else
+                {
+                    Debug.Log("Votre inventaire actuel ne contient pas " + slotItem);
+                }
+                
             }
         }
 

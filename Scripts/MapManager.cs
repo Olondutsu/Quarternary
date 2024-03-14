@@ -24,6 +24,7 @@ public class MapManager : MonoBehaviour
     public GameObject selectionPage;
 
     public List<Slot> selectionSlots = new List<Slot>();
+    public List<MapEvent> mapEventsAvailable = new List<MapEvent>();
 
     public Image image;
 
@@ -31,6 +32,8 @@ public class MapManager : MonoBehaviour
     public Sprite grassCaseSprite;
     public Sprite mountainCaseSprite;
     public Sprite baseCaseSprite;
+    public Sprite ennemyBaseCaseSprite;
+    public Sprite ennemyOccupiedCaseSprite;
     
     public Text travelText;
     public int caseYCount = 8;
@@ -38,7 +41,8 @@ public class MapManager : MonoBehaviour
     public int onTravel;
     public bool mapDisplayed = false;
     public bool mapUIActive = false;
-    public bool casesMemberGenerated = false;
+    bool casesMemberGenerated = false;
+    bool casesEventGenerated = false;
     public void Start()
     {
         displayJournal = FindObjectOfType<DisplayJournal>();
@@ -81,22 +85,41 @@ public class MapManager : MonoBehaviour
     {
         // A REVOIR TOUTE CETTE FONCTION
         // On va plutôt définir une mapCase pour chaque mapEvent, c'est plus logique
-        foreach(MapCase mapCase in mapCases)
+        foreach(MapEvent mapEvent in mapEventsAvailable)
         {
-            foreach(MapEvent mapEvent in mapCase.mapEvents)
+            int randomIndex = Random.Range(0, mapCases.Count);
+            MapCase mapCase = null;
+            MapCase aMapCase = mapCases[randomIndex];
+
+            if(aMapCase.isFree)
             {
-                if(mapCase.isFree)
+                aMapCase.isFree = false;
+                aMapCase.thisCaseEvent = mapEvent;
+                mapCase = aMapCase;
+
+            }
+            else
+            {
+                foreach(MapCase anotherMapCase in mapCases)
                 {
-                    mapCase.isFree = false;
-                    int randomIndex = Random.Range(0, 10);
-
-                    // A remplacer la liste de mapCase par une liste sur MapManager pour seulement mettre 1 event sur une case
-                    MapEvent currentMapEvent = mapCase.mapEvents[randomIndex];
-
-                    mapCase.thisCaseEvent = currentMapEvent;
+                    if(mapCase.isFree)
+                    {
+                        anotherMapCase.thisCaseEvent = mapEvent;
+                        mapCase = anotherMapCase;
+                    }
                 }
             }
+
+            if(mapEvent.isEnnemyBase)
+            {
+                mapCase.image.sprite = ennemyBaseCaseSprite;
+            }
+            if(mapEvent.isEnnemyPatrol)
+            {
+                mapCase.image.sprite = ennemyOccupiedCaseSprite;
+            }
         }
+        casesEventGenerated = true;
     }
 
     public void PopulateCasesMember()
@@ -142,7 +165,12 @@ public class MapManager : MonoBehaviour
         }
         if(!casesMemberGenerated)
         {
+            
             PopulateCasesMember();
+        }
+        if(!casesEventGenerated)
+        {
+            RandomizeCasesEvent();
         }
     }
 
@@ -152,6 +180,7 @@ public class MapManager : MonoBehaviour
 
     public void MapEventArrivalTrigger()
     {
+        // Here is a small problem, because clickedCase could evolve depending of time, or we remove the ability to travel or open the map if you have someone out
         MapCase clickedCase = selectedBase.clickedCase;
         GameObject mapEventPageGO = mapEventPage.gameObject;
         

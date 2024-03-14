@@ -10,7 +10,8 @@ public class Base : MonoBehaviour
     public List<Member> membersInTravel = new List<Member>();
     public List<Member> selectedMembers = new List<Member>();
     
-    public List<ItemData> itemsInBase = new List<ItemData>();
+    public ItemData[] itemData;
+    public List<InventoryItem> itemsInBase = new List<InventoryItem>();
     public List<Page> pagesForBase = new List<Page>();
     public List<GameObject> pagePrefab = new List<GameObject>();
 
@@ -21,4 +22,17 @@ public class Base : MonoBehaviour
     public bool available;
     public bool displayed = false;
     public bool isFull = false;
+
+    [System.Serializable]
+    public class InventoryItem
+    {
+        public ItemData itemData;
+        public int quantity;
+
+        public InventoryItem(ItemData itemData, int quantity)
+        {
+            this.itemData = itemData;
+            this.quantity = quantity;
+        }
+    }
 }

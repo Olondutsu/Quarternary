@@ -18,10 +18,19 @@ public class GameManager : MonoBehaviour
 
     public void GameOver()
     {
-        Animation anim = displayJournal.transitionPanel.GetComponent<Animation>();
-        displayJournal.transitionPanel.SetActive(true);
-        displayJournal.transiDayText.text = "GAME OVER";
-        anim.Play("GameOver");
-        Debug.Log("Game OVer !!");
+        displayJournal.transitionPanel.SetActive(false);
+        Animation animGO = displayJournal.transitionPanel.GetComponent<Animation>();
+        if(animGO != null)
+        {
+            displayJournal.transitionPanel.SetActive(true);
+            displayJournal.transiDayText.text = "GAME OVER";
+            animGO.Play("GameOver");
+            Debug.Log("Game OVer !!");
+        }
+        else
+        {
+            Debug.Log("Else GameOver donc animGO = null :'()");
+        }
+
     }
 }

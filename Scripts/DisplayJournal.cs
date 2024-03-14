@@ -353,21 +353,21 @@ public class DisplayJournal : MonoBehaviour
 
         int xOffset = 0;
 
-        foreach(ItemData item in selectedBase.itemsInBase)
+        foreach(Base.InventoryItem item in selectedBase.itemsInBase)
         {
-            if(item.isSupplie)
+            if(item.itemData.isSupplie)
             {
-                if(item.isFood)
+                if(item.itemData.isFood)
                 {
-                    foodItemData = item;
+                    foodItemData = item.itemData;
                 }
-                if(item.isDrink)
+                if(item.itemData.isDrink)
                 {
-                    drinkItemData = item;
+                    drinkItemData = item.itemData;
                 }
-                if(item.isHealKit)
+                if(item.itemData.isHealKit)
                 {
-                    healKitItemData = item;
+                    healKitItemData = item.itemData;
                 }
             }
         }
@@ -694,12 +694,13 @@ public class DisplayJournal : MonoBehaviour
         {
             if(slot.slotItem != null)
             {
-                ItemData item = slot.slotItem;
+                // Base.InventoryItem item = slot.slotItem;
+                ItemData itemData = slot.slotItem;
                 Member member = slot.slotMember;
 
-                if(item.selected)
+                if(itemData.selected)
                 {
-                    itemsManager.OnUse(slot.slotMember, item);
+                    itemsManager.OnUse(member, itemData);
                 }
             }
         }

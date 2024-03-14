@@ -1,10 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class ItemsManager : MonoBehaviour
 {
 
+    public List<ItemData>displayedItems = new List<ItemData>();
     public Transform[] foodVisualPositions;
     public Transform[] drinkVisualPositions;
     public Transform[] rifleVisualPositions;
@@ -26,72 +29,45 @@ public class ItemsManager : MonoBehaviour
 
     public void AddItem(Base aBase, ItemData addItem, int amount)
     { 
-        for(int i = 1; i < amount; i++)
+        Debug.Log("AddItem appelé pour " + addItem + "Amount : " + amount);
+        Base.InventoryItem existingItem = aBase.itemsInBase.Find(item => item.itemData == addItem);
+
+        if (existingItem != null)
         {
-            aBase.itemsInBase.Add(addItem);
+            // Si l'élément existe déjà, augmentez simplement sa quantité
+            existingItem.quantity += amount;
         }
-        // SWitch to Quantities for each items
-        
-        ItemCount();
+        else
+        {
+            aBase.itemsInBase.Add(new Base.InventoryItem(addItem, amount));
+        }
+        DisplayItemsVisual();
     }
 
     public void RemoveItem(Base aBase, ItemData rmvItem, int amount)
     {
-        aBase.itemsInBase.Remove(rmvItem);
-        ItemCount();
+        Base.InventoryItem existingItem = aBase.itemsInBase.Find(item => item.itemData == rmvItem);
+
+        if(existingItem.quantity > 1)
+        {
+            existingItem.quantity -= amount;
+        }
+        else
+        {
+            aBase.itemsInBase.Remove(existingItem);
+        }
+        DisplayItemsVisual();
     }
 
     public void DisplayItemsVisual()
     {
-        int foodCount = 0;
-        int drinkCount = 0;
-        int rifleCount = 0;
+        // Base.InventoryItem existingItem = selectedBase.itemsInBase.Find(item => item.itemData == addItem);
+
         int foodTransformCount = 0;
         int drinkTransformCount = 0;
         int rifleTransformCount = 0;
-        // Crer une genre de liste de transform avec tous les items existants, ajouter a tous un sprite
-        foreach(ItemData item in selectedBase.itemsInBase)
-        {
-            if(!item.Displayed)
-            {
-                if(item.isFood)
-                {
-                    item.Displayed = true;
-                    foodCount++;
-                }
-                if(item.isDrink)
-                {
-                    item.Displayed = true;
-                    drinkCount++;
-                }
-                if(item.isHealKit)
-                {
-                    item.Displayed = true;
-                    healKitVisual.SetActive(true);
-                }
-                if(item.name == "Rifle")
-                {  
-                    item.Displayed = true;
-                    rifleCount++;
-                }
-                if(item.name == "Shovel")
-                {  
-                    item.Displayed = true;
-                    shovelVisual.SetActive(true);
-                }
-
-                if(item.name == "Axe")
-                {  
-                    item.Displayed = true;
-                    axeVisual.SetActive(true);
-                }
-                if(item.name == "Radio")
-                {  
-                    item.Displayed = true;
-                    radioVisual.SetActive(true);
-                }
-            }
-        }
+        
+        
         foreach(Transform transform in foodVisualPositions)
         {
             foodTransformCount++;
@@ -107,56 +83,101 @@ public class ItemsManager : MonoBehaviour
             rifleTransformCount++;
         }
 
-        if(rifleCount > rifleTransformCount)
-        {
-            rifleCount = rifleTransformCount;
-        }
+        // foreach(Base.InventoryItem inventoryItem in selectedBase.itemsInBase)
+        // {
+            for(int y = 0; y < selectedBase.itemsInBase.Count; y++)
+            {
 
-        if(foodCount > foodTransformCount)
-        {
-            foodCount = foodTransformCount;
-        }
+            Base.InventoryItem inventoryItem = selectedBase.itemsInBase[y];
+            Debug.Log("recuperation des inventoryItem " + inventoryItem + inventoryItem.itemData);
+            ItemData item = inventoryItem.itemData;
 
-        if(drinkCount > drinkTransformCount)
-        {
-            drinkCount = drinkTransformCount;
-        }
+            if(item.name == "Rifle")
+            {
+                for(int i = 0; inventoryItem.quantity > i; i++)
+                {   
+                    Debug.Log("for int i = à ; i < inventoryItem.quantity" + item.name);
+                    if(inventoryItem.quantity < rifleTransformCount)
+                    {
+                        if(rifleVisualPositions[i].transform.childCount == 0)
+                        {
+                            GameObject visual = Instantiate(rifleVisualPrefab, rifleVisualPositions[i].position, Quaternion.identity);
+                            visual.transform.parent = rifleVisualPositions[i]; 
+                        }
 
-        for(int i = 0; i < foodCount; i++)
-        {
-            GameObject visual = Instantiate(foodVisualPrefab, foodVisualPositions[i].position, Quaternion.identity);
-            visual.transform.parent = foodVisualPositions[i];
-        }
+                    }
+                }
+            }
+            if(item.name == "Food")
+            {
+                for(int i = 0; i < inventoryItem.quantity; i++)
+                {
+                     Debug.Log("for int i = à ; i < inventoryItem.quantity" + item.name);
+                    if(inventoryItem.quantity < foodTransformCount)
+                    {
+                        if(foodVisualPositions[i].transform.childCount == 0)
+                        {
+                            GameObject visual = Instantiate(foodVisualPrefab, foodVisualPositions[i].position, Quaternion.identity);
+                            visual.transform.parent = foodVisualPositions[i];
+                        }
+                    }
+                }
+            }
+            
+            if(item.name == "Water")
+            {
+                for(int i = 0; i < inventoryItem.quantity; i++)
+                {
+                    Debug.Log("for int i = à ; i < inventoryItem.quantity" + item.name);
+                    if(inventoryItem.quantity < drinkTransformCount)
+                    {
+                        if(drinkVisualPositions[i].transform.childCount == 0)
+                        {
+                            GameObject visual = Instantiate(drinkVisualPrefab, drinkVisualPositions[i].position, Quaternion.identity);
+                            visual.transform.parent = drinkVisualPositions[i];
+                        }
+                    }
+                }
+            }
 
-        for(int i = 0; i < drinkCount; i++)
-        {
-            GameObject visual = Instantiate(drinkVisualPrefab, drinkVisualPositions[i].position, Quaternion.identity);
-            visual.transform.parent = drinkVisualPositions[i];
-        }
-        
-        for(int i = 0; i < rifleCount; i++)
-        {
-            GameObject visual = Instantiate(rifleVisualPrefab, rifleVisualPositions[i].position, Quaternion.identity);
-            visual.transform.parent = rifleVisualPositions[i];
-        }
+            if(item.isHealKit)
+            {
+                healKitVisual.SetActive(true);
+            }
 
+            if(item.name == "Shovel")
+            {  
+                shovelVisual.SetActive(true);
+            }
+
+            if(item.name == "Axe")
+            {  
+                axeVisual.SetActive(true);
+            }
+            if(item.name == "Radio")
+            {  
+                radioVisual.SetActive(true);
+            }
+            }
+        // }
     }
+
     
     public void ItemCount()
     {
-        foreach(ItemData item in selectedBase.itemsInBase)
+        foreach(Base.InventoryItem item in selectedBase.itemsInBase)
         {
-            if(item.isFood)
+            if(item.itemData.isFood)
             {
                 food++;
             }
 
-            if(item.isDrink)
+            if(item.itemData.isDrink)
             {
                drink++; 
             }
             
-            if(item.isHealKit)
+            if(item.itemData.isHealKit)
             {
                 healKit++;
             }
@@ -166,24 +187,26 @@ public class ItemsManager : MonoBehaviour
     // ajout d'un  Member ?,
     public void OnUse(Member teamMember, ItemData usedItem)
     {
+        Base.InventoryItem existingItem = selectedBase.itemsInBase.Find(item => item.itemData == usedItem);
+
         if(usedItem.isFood)
         {
             teamManager.FeedMember(teamMember, teamManager.feedRate);
-            selectedBase.itemsInBase.Remove(usedItem);
+            RemoveItem(selectedBase, usedItem, 1);
             ItemCount();
         }
 
         if(usedItem.isDrink)
         { 
             teamManager.UnthirstMember(teamMember, teamManager.drinkRate);
-            selectedBase.itemsInBase.Remove(usedItem);
+            RemoveItem(selectedBase, usedItem, 1);
             ItemCount();
         }
 
         if(usedItem.isHealKit)
         {
             teamManager.HealMember(teamMember);
-            selectedBase.itemsInBase.Remove(usedItem);
+            RemoveItem(selectedBase, usedItem, 1);
             ItemCount();
         }
     }

@@ -196,21 +196,34 @@ public class EventGenerator : MonoBehaviour
         
         foreach(ItemData reward in anEvent.reward)
         {
-            amount = Random.Range(0, 5);
-            itemManager.AddItem(thisBase, reward, amount);
+            Debug.Log("Each reward " + reward);
+            if(reward.isCommon)
+            {
+                amount = Random.Range(0, 5);
+            }
+            if(reward.isRare)
+            {
+                amount = Random.Range(0, 1);
+            }
+            
+            if(amount > 0)
+            {
+                itemManager.AddItem(thisBase, reward, amount);
+            }
         }
 
         foreach(ItemData loss in anEvent.loss)
         {
-             itemManager.AddItem(thisBase, loss, amount);
+             itemManager.RemoveItem(thisBase, loss, amount);
         }
 
         foreach(ItemData neededItems in anEvent.neededItems)
         {
-            foreach(ItemData ownedItems in thisBase.itemsInBase)
+            foreach(Base.InventoryItem ownedItems in thisBase.itemsInBase)
             {
+            // Base.InventoryItem existingItem = selectedBase.itemsInBase.Find(item => item.itemData == ownedItems);
             // A modifier, ici ptet créer une liste d'Items pour verifier si ya bien les items dans l'inventaire blblbla
-                if(ownedItems == neededItems) 
+                if(ownedItems.itemData == neededItems) 
                 {
                     slot.emptyVisual = neededItems.journalVisualAvailable;
                 }
@@ -220,8 +233,6 @@ public class EventGenerator : MonoBehaviour
                 }
             }
         }
-        
-        itemManager.DisplayItemsVisual();
     }
 
      public void MemberHandler()

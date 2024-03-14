@@ -691,7 +691,7 @@ public class TeamManager : MonoBehaviour
                 memberCount++;
             }
         }
-        if(memberCount == 0)
+        if(memberCount == 0 && timeManager.currentDay > 1)
         {
             gameManager.GameOver();
         }

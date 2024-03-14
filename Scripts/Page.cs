@@ -65,7 +65,7 @@ public class Page: MonoBehaviour
         eventGenerator.EventItemHandler(displayJournal.nextEvent);
         // displayJournal.ImmediateNextEventPage(this, eventGenerator.currentEvent);
         CheckButtons();
-        OnNextClick();
+        displayJournal.OnNextPage();
 
     }
     public void OnNoClick()
@@ -75,7 +75,7 @@ public class Page: MonoBehaviour
          eventGenerator.EventItemHandler(displayJournal.nextEvent);
         //  displayJournal.ImmediateNextEventPage(this, eventGenerator.currentEvent);
          CheckButtons();
-         OnNextClick();
+         displayJournal.OnNextPage();
     }
     public void OnNextClick()
     {

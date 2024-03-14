@@ -13,6 +13,8 @@ public class MapEvent : ScriptableObject
     public bool conditionsMet;
     public bool completed;
     public bool isFree;
+    public bool isEnnemyBase;
+    public bool isEnnemyPatrol;
     public bool isOnMap;
     public bool isRandom;
     public int delayDays;
