@@ -14,6 +14,7 @@ public class MapCase: MonoBehaviour
     public MapEvent[] mapEvent;
     public MapEvent thisCaseEvent;
     public Base selectedBase;
+    public Base hostedBase;
     public List<MapEvent> mapEvents = new List<MapEvent>();
 
     public List<MapCase> neighbors = new List<MapCase>();
@@ -103,11 +104,14 @@ public class MapCase: MonoBehaviour
 
     public void OnCaseClick()
     {
+
+        
         mapManager.GetMapCase(XCoordinate, YCoordinate);
         selectedBase.clickedCase = instance;
 
         mapManager.CalculateMapDistance(instance);
         isClicked = true;
+
 
         if(instance.isBaseFrom)
         {
@@ -121,9 +125,5 @@ public class MapCase: MonoBehaviour
         }
     }
 
-    public void Bypass()
-    {
-        Start();
-    }
 }
 

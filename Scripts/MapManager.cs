@@ -22,6 +22,8 @@ public class MapManager : MonoBehaviour
 
     public GameObject caseParent;
     public GameObject selectionPage;
+    public GameObject travelActionsPanel;
+    public GameObject buildCampButton;
 
     public List<Slot> selectionSlots = new List<Slot>();
     public List<MapEvent> mapEventsAvailable = new List<MapEvent>();
@@ -34,6 +36,8 @@ public class MapManager : MonoBehaviour
     public Sprite baseCaseSprite;
     public Sprite ennemyBaseCaseSprite;
     public Sprite ennemyOccupiedCaseSprite;
+    public Sprite townOccupiedCaseSprite;
+    public Sprite ennemyComCaseSprite;
     
     public Text travelText;
     public int caseYCount = 8;
@@ -41,15 +45,20 @@ public class MapManager : MonoBehaviour
     public int onTravel;
     public bool mapDisplayed = false;
     public bool mapUIActive = false;
+
+    public bool onCampClick;
+    public bool onTravelClick;
+    public bool onAttackClick; 
+
     bool casesMemberGenerated = false;
     bool casesEventGenerated = false;
+
     public void Start()
     {
         displayJournal = FindObjectOfType<DisplayJournal>();
         selectedBase = FindObjectOfType<Base>();
         PopulateMap();
         mapUI.SetActive(false);
-        
     }
 
     public MapCase GetMapCase(int x, int y)
@@ -174,8 +183,26 @@ public class MapManager : MonoBehaviour
         }
     }
 
-    public void DefineTravelCase()
+
+    public void OnCreateBase()
     {
+        Base newBase = new Base();
+
+        MapCase targetBase = selectedBase.clickedCase;
+        targetBase.hostedBase = newBase;
+        targetBase.isFree = false;
+        targetBase.image.sprite = baseCaseSprite;
+    
+        teamManager.CreateNewBase(newBase);
+
+        for(int i = 0; i < selectedBase.membersInTravel.Count;  i++)
+        {
+            Member aMember = selectedBase.membersInTravel[0];
+            selectedBase.membersInTravel.Remove(aMember);
+            teamManager.AddMember(newBase, aMember);
+        }
+        teamManager.DisplayBases();
+        
     }
 
     public void MapEventArrivalTrigger()
@@ -183,7 +210,10 @@ public class MapManager : MonoBehaviour
         // Here is a small problem, because clickedCase could evolve depending of time, or we remove the ability to travel or open the map if you have someone out
         MapCase clickedCase = selectedBase.clickedCase;
         GameObject mapEventPageGO = mapEventPage.gameObject;
-        
+        if(onCampClick)
+        {
+            
+        }
         if (clickedCase.memberOccupied)
         {
             Debug.Log("La Case est occupé par un membre");
@@ -202,11 +232,11 @@ public class MapManager : MonoBehaviour
             // selectedBase.membersInTravel.Add(clickedCase.member);
             mapEventPageGO.SetActive(true);
         }
-        
         else
         {
             Debug.Log("La Case est pas occupé par un membre");
         }
+
         if (clickedCase.eventOccupied)
         {
             Debug.Log("La Case est occupé par un event");
@@ -217,6 +247,10 @@ public class MapManager : MonoBehaviour
         {
             Debug.Log("La Case est pas occupé par un membre");
         }
+        if(onCampClick)
+        {
+            OnCreateBase();
+        }
     }
 
     public void PopulateMapEventPage()
@@ -224,8 +258,11 @@ public class MapManager : MonoBehaviour
 
     }
 
+
+
     public void MapEventReturnTrigger()
     {
+
         foreach(Member member in selectedBase.membersInTravel)
         {
             selectedBase.membersInBase.Add(member);
@@ -244,6 +281,7 @@ public class MapManager : MonoBehaviour
         OnClickTravel();
     }
     
+    // SElECTION PAGE && BUTTONS CLICK
     public void DisplayTravel(int travelTime)
     {
         travelText.text = travelTime + "DAYS";
@@ -251,9 +289,14 @@ public class MapManager : MonoBehaviour
 
     public void OnConfirmTravel()
     {
+        
         teamManager.OnTravel();
         displayJournal.travelButtons.SetActive(false);
         selectionPage.SetActive(false);
+
+        Button aButton = buildCampButton.GetComponent<Button>();
+        aButton.interactable = false;
+        
     }
     public void OnCancelTravel()
     {
@@ -264,9 +307,52 @@ public class MapManager : MonoBehaviour
     public void OnClickTravel()
     {
         displayJournal.travelButtons.SetActive(true);
-        selectionPage.SetActive(true);
+        PopulateTravelSelectionPage();
+        
     }
     
+    public void OnCreateBaseClick()
+    {
+        onCampClick = true;
+        displayJournal.travelButtons.SetActive(true);
+    }
+
+
+    public void PopulateTravelSelectionPage()
+    {
+        bool hasShovel = false;
+        bool hasAxe = false;
+
+        // Search if we can create a Base
+        foreach(Base.InventoryItem item in selectedBase.itemsInBase)
+        {
+            ItemData anItem = item.itemData;
+
+            if(anItem.name == "Shovel")
+            {
+                hasShovel = true;
+            }
+            if(anItem.name == "Axe")
+            {
+                hasAxe = true;
+            }
+        }
+
+        if(hasShovel && hasAxe)
+        {
+            // buildCampButton.SetActive(true);
+            Button aButton = buildCampButton.GetComponent<Button>();
+            aButton.interactable = true;
+        }
+        else
+        {
+            Button aButton = buildCampButton.GetComponent<Button>();
+            aButton.interactable = false;
+            
+        }   
+        selectionPage.SetActive(true);
+    }
+
     public void DisplayCasesEvent()
     {
         foreach(MapCase mapCase in mapCases)
